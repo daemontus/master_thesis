@@ -21,6 +21,7 @@
                 %% in either Czech or Slovak, respectively.
   german, russian, czech, slovak %% The additional keys allow
 ]{babel}        %% foreign texts to be typeset as follows:
+\usepackage{acro}
 %%
 %%   \begin{otherlanguage}{german}  ... \end{otherlanguage}
 %%   \begin{otherlanguage}{russian} ... \end{otherlanguage}
@@ -56,3 +57,146 @@
 \usepackage{amsthm}
 \usepackage{amsfonts}
 \usepackage{url}      %% Hyperlinks
+
+% Custom macros and definitions
+
+\newcommand{\INIT}{\STATE \textbf{init} {}}
+\newcommand{\df}{\scalebox{.9}{$\stackrel{{\tiny \mathrm{df}}}{=}$}}
+\newcommand{\TBA}{{\bf TBA}}
+
+\newcommand{\ptort}[1]{\mbox{$\stackrel{#1}{\rightarrow}\hspace{-.65ex}%
+		\raisebox{.15em}{\scriptsize *}\hspace{.65ex}$}}
+\newcommand{\ptot}[1]{\mbox{$\stackrel{#1}{\rightarrow}\hspace{-.65ex}%
+		\raisebox{.15em}{\scriptsize +}\hspace{.65ex}$}}
+\newcommand{\pto}[1]{\stackrel{#1}{\rightarrow}}
+\newcommand{\ptoprime}[1]{\stackrel{#1}{\rightarrow}\hspace{-1mm}\raisebox{-0.5mm}{$'$}{\,}}
+\newcommand{\redmod}[2]{{#1}|_{#2}}
+\DeclareMathOperator{\Succ}{Succ}
+\DeclareMathOperator{\SCC}{SCC}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+
+\newcommand{\ks}[1][]{\ensuremath{ \mathcal K_{#1}=(\mathcal P, S_{#1},I_{#1},\to_{#1}, L_{#1})\ }}
+%{{{ Mod_M
+\renewcommand{\mod}[1][\mathcal K]
+{\ensuremath{Fragment_{#1}}}
+\newcommand{\modul}[1][\mathcal K]%
+{\ensuremath{\mathcal{F}_{#1}}}
+%}}}
+
+%{{{ MC(M,As) (\mc structure as.f.)
+\newcommand{\mc}[1][\mathcal K]{\ensuremath{\mathcal{C}_{#1}}}
+\newcommand{\mcpsi}[1][\mathcal K]{\ensuremath{\mathcal{C}_{#1}^\psi}}
+%}}}
+
+%{{{ True, false
+\newcommand{\ttrue}{\ensuremath{\texttt{tt}}}
+\newcommand{\ffalse}{\ensuremath{\texttt{ff}}}
+%}}}
+%{{{ assumption function
+\newcommand{\as}[1][]{\ensuremath{\mathcal{A}_{#1}}}
+\newcommand{\AS}[1][\mathcal K]{\ensuremath{AS_{#1}}}
+\newcommand{\ASpsi}{\ensuremath{AS_{\mathcal K}^\psi}}
+\newcommand{\asu}{\ensuremath{\mathcal{A}_{\perp}}}
+%}}}
+
+\newcommand{\bind}{\downarrow\hspace*{-.5ex}}
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+% New definitions
+\algnewcommand\algorithmicswitch{\textbf{switch}}
+\algnewcommand\algorithmiccase{\textbf{case}}
+\algnewcommand\algorithmicassert{\texttt{assert}}
+\algnewcommand\Assert[1]{\State \algorithmicassert(#1)}%
+% New "environments"
+\algdef{SE}[SWITCH]{Switch}{EndSwitch}[1]{\algorithmicswitch\ #1\ \algorithmicdo}{\algorithmicend\ \algorithmicswitch}%
+\algdef{SE}[CASE]{Case}{EndCase}[1]{\algorithmiccase\
+	#1}{\algorithmicend\ \algorithmiccase}%
+
+
+\algblockdefx{FORALLP}{ENDFAP}[2]%
+{\textbf{for all }#1 \textbf{do in parallel} #2}%
+
+%\input{tl_macros}
+
+% hybrid operators
+\newcommand{\fix}{\operatorname{\downarrow}}
+\newcommand{\jump}{\operatorname{@\!}}
+
+% logic name
+%\newcommand{\huctl}{HUCTL$_\text{P}$\xspace}:
+
+%% Definitions
+
+%% General
+
+\newcommand{\var}{\mathit{Var}}
+\newcommand{\true}{\mathit{true}}
+\newcommand{\false}{\mathit{false}}
+
+%% Notion of time
+
+\newcommand{\future}[1]{{}^\vartriangleright#1}
+\newcommand{\past}[1]{{}^\vartriangleleft#1}
+\newcommand{\withTime}[1]{{}^t#1}
+
+%% Transition System
+
+\newcommand{\tsS}{\mathit{S}}
+\newcommand{\tsT}{\mathit{T}}
+\newcommand{\tsAP}{\mathit{AP}}
+\newcommand{\tsL}{\mathit{L}}
+
+\DeclareAcronym{TS}{
+	short = TS,
+	long = transition system
+}
+
+\newcommand{\tsTransition}{\rightarrow}
+
+%% Direction Transition System
+
+\newcommand{\dtsS}{\tsS}
+\newcommand{\dtsT}{\tsT}
+\newcommand{\dtsDir}{\mathit{Dir}}
+\newcommand{\dtsAP}{\tsAP}
+\newcommand{\dtsL}{\tsL}
+
+\newcommand{\dtsTuple}{\ensuremath{(\dtsS, \dtsDir, \dtsT, \dtsAP, \dtsL)}}
+
+\newcommand{\dtsTransition}[1]{\stackrel{#1}{\rightarrow}}
+
+\DeclareAcronym{DTS}{
+	short = DTS, 
+	long = direction transition system
+}
+
+%% HUCTLp
+
+\newcommand{\ctlOp}[1]{\operatorname{\mathbf{#1}}}
+
+% Path quantifiers
+
+\newcommand{\ctlE}{\ctlOp{E}}
+\newcommand{\ctlA}{\ctlOp{A}}
+
+% State quantifiers
+
+\newcommand{\ctlDir}[1]{{}_{#1}}
+
+\newcommand{\ctlX}{\ctlOp{X}}
+\newcommand{\dctlX}[1]{\ctlDir{#1}\ctlOp{X}}
+\newcommand{\dctlUl}[1]{\ctlDir{#1}\ctlOp{U}}
+\newcommand{\dctlUlr}[2]{\ctlDir{#1}\ctlOp{U}_{#2}}
+\newcommand{\ctlW}{\ctlOp{W}}
+\newcommand{\dctlWl}[1]{\ctlDir{#1}\ctlOp{W}}
+\newcommand{\dctlWlr}[2]{\ctlDir{#1}\ctlOp{W}_{#2}}
+
+\newcommand{\hctlBind}[1]{\fix #1.}
+\newcommand{\hctlAt}[1]{\jump #1.}
+\newcommand{\hctlExists}[1]{\exists #1.}
+
+\DeclareAcronym{HUCTLp}{
+	short = HUCTL$_\text{P}$,
+	long = hybrid computation tree logic with past
+}

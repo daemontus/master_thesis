@@ -1,0 +1,99 @@
+\section{\Acl{DTS}}
+
+A \emph{\acl{DTS}} (\acs{DTS}) is a tuple $\dtsTuple$, where:
+
+\begin{itemize}
+	\item $\dtsS$ is a set of states;
+	\item $\dtsDir$ is a finite non-empty set of \emph{directions};
+	\item $\dtsT \subseteq \dtsS \times \dtsDir \times \dtsS$ is the transition relation satisfying the following conditions:
+	\begin{itemize}
+		\item[--] $\dtsT$ is \emph{total}, i.e.~for each $s$ there are $s'$ and $d$ such that $(s, d,
+		s')\in \dtsT$,
+		\item[--] $\dtsT$ is \emph{past-total}, i.e.~for each $s$ there are $s'$ and $d$ such that
+		$(s', d, s)\in \dtsT$,
+		\item[--] for each $s \ne s'$ there is at most one $d$ such that $(s, d, s')\in \dtsT$,
+		\item[--] for each $s$ either there is no $d$ such that $(s,d,s) \in \dtsT$ or
+		for all $d \in \dtsDir: (s,d,s) \in \dtsT$;
+	\end{itemize}
+	\item $\dtsAP$ is a set of atomic propositions;
+	\item $L : \dtsS \rightarrow 2^\dtsAP$ is a labelling function that associates a subset of $\dtsAP$ to each state.
+\end{itemize}
+
+We will also use $s \dtsTransition{d} s'$ to denote $(s, d, s') \in \dtsT$ and $s \tsTransition s'$ if there exists $d \in \dtsDir$ such that $s \dtsTransition{d} s'$.
+
+Intuitively ...
+
+To reason about the semantics of a \ac{DTS}, we define the notion of infinite runs. Let $M = \dtsTuple$ be a \ac{DTS}, then:
+
+\begin{itemize}
+	\item A \emph{future run} $\future{\pi}$ is an infinite sequence $s_0, d_0, s_1, d_1, s_2, \ldots$ such that $(s_i, d_{i}, s_{i+1}) \in \dtsT$ for all $i$;
+	\item A \emph{past run} $\past{\pi}$ is an infinite sequence $s_0, d_0, s_1, d_1, s_2, \ldots$ such that $(s_{i+1}, d_{i}, s_{i}) \in \dtsT$ for all $i$;
+	\item We will use $\pi$ to denote runs that can be both future or past;
+	\item We use $\pi_\dtsS(i)$ to denote $i$th state $s_i$ and $\pi_\dtsDir(i)$ to denote $i$th action $d_i$  of run $\pi$;
+	\item $\future{runs(s)}$ and $\past{runs(s)}$ denote the sets of all future and past runs respectively originating in the state $s$;
+\end{itemize}
+
+\section{Direction formulae}
+
+To reason about a direction of a specific transition, we define the language of direction formulae.
+
+Let $\dtsDir$ be a set of directions. The language of direction formulae is then defined as follows:
+
+\[
+	\chi ::= \true \mid d \mid \neg\chi \mid \chi\wedge\chi
+\]
+
+For a direction $\hat d$ is the satisfaction relation $\models$ then defined as follows:
+
+\begin{alignat*}{4}
+	\hat d &\models \true \\
+	\hat d &\models d 								&&\iff \hat d = d \\
+	\hat d &\models \neg\chi 					 &&\iff \hat d\not\models\chi \\
+	\hat d &\models \chi_1 \land \chi_2 	 &&\iff \hat d\models\chi_1 \text{ and } \hat d\models\chi_2
+\end{alignat*}
+
+\section{\Acl{HUCTLp}}
+
+To reason about a \ac{DTS}, we define the following \ac{HUCTLp} logic.
+
+Let $p$ be an atomic proposition from set $\dtsAP$, $d$ a direction formula over $\dtsDir$,  $t$ one of $\{ \future{}, \past{} \}$ and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
+
+\begin{align*}
+	\varphi 	&::= 	\true \mid p \mid x \mid  \neg \varphi \mid \hctlBind{x} \varphi \mid \hctlAt{x} \varphi \mid \hctlExists{x} \varphi  \mid \varphi \land \varphi \mid \withTime{\ctlE \psi} \mid \withTime{\ctlA \psi} \\
+	\psi 		  &::= 	  \dctlX{\chi} \varphi \mid
+	\varphi \dctlUl{\chi} \varphi \mid
+	\varphi \dctlUlr{\chi}{\chi} \varphi \mid
+	\varphi \dctlWl{\chi} \varphi \mid
+	\varphi \dctlWlr{\chi}{\chi} \varphi
+\end{align*}
+
+We call the formulae defined by $\varphi$ a \emph{state formulae} and the formulae defined by $\psi$ a \emph{path formulae}. 
+
+\emph{Model of state formula is a state + valuation. Model of path formula is a run + valuation.}
+
+To define the semantics of \ac{HUCTLp} over a \ac{DTS}, we have to extend the model with a valuation of state variables $h : \var \to \dtsS$. We will use $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to state $s$ but is otherwise defined as valuation $h$. Formally:
+\[
+	h[x \mapsto s](x') = \begin{cases}
+		s & x' = x \\
+		h(x') & otherwise
+	\end{cases}
+\]
+
+Let $M = \dtsTuple$ be \ac{DTS} and $h : \var \to \dtsS$ a valuation of state variables. The satisfaction relation for states and runs of $M$ with respect to \ac{HUCTLp} formulae is defined as follows:
+
+\begin{alignat*}{2}
+	(M,h,s) &\models \true	\\
+	(M,h,s) &\models p											   && \iff p \in \dtsL(s) \\
+	(M,h,s) &\models x											   && \iff h(x) = s \\
+	(M,h,s) &\models \neg \varphi  							  && \iff (M, h,s) \not\models \varphi \\
+	(M,h,s) &\models \hctlBind{x} \varphi 				   && \iff (M,h[x \mapsto s], s) \models \varphi \\
+	(M,h,s) &\models \hctlAt{x} \varphi 					&& \iff (M,h,h(x)) \models \varphi \\
+	(M,h,s) &\models \hctlExists{x} \varphi 			  && \iff \exists s' \in \dtsS :  (M,h[x \mapsto s'], s) \models \varphi \\	
+	(M,h,s) &\models \varphi_1 \land \varphi_2 			&& \iff (M,h,s) \models \varphi_1 \text{ and } (M,h,s) \models \varphi_2  \\
+	(M,h,s) &\models \withTime{\ctlE \psi} 				  && \iff \exists \pi \in \withTime{runs} : (M,h,\pi) \models \psi \\
+	(M,h,s) &\models \withTime{\ctlA \psi} 				  && \iff \forall \pi \in \withTime{runs} : (M,h,\pi) \models \psi \\	
+\end{alignat*}
+
+\begin{alignat*}{2}
+	(M,h,\pi) &\models \dctlX{\chi} \varphi				   && \iff \pi_\dtsDir(0) \models \chi \text{ and } (M, h, \pi_\dtsS(1)) \models \varphi \\
+\end{alignat*}

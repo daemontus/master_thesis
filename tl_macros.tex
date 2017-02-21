@@ -1,0 +1,96 @@
+% auxiliary macros for CTL formulae
+\newcommand{\TLfont}[1]{\mathbf{#1}}
+\newcommand{\actl}[2]{{}_\mathnormal{#2}{#1}}
+\newcommand{\actlr}[3]{{}_\mathnormal{#2}{#1}_\mathnormal{#3}}
+\newcommand{\TLop}[1]{\operatorname{\TLfont{{#1}}}}
+\newcommand{\TLbin}[1]{\mathbin{\TLop{#1}}}
+\newcommand{\CTLop}[2]{\operatorname{\TLfont{#1{#2}}}}
+\newcommand{\TLopl}[2]{\operatorname{\TLfont{\actl{#1}{#2}}}}
+\newcommand{\TLbinl}[2]{\mathbin{\TLopl{#1}{#2}}}
+\newcommand{\CTLopl}[3]{\operatorname{\TLfont{#1\actl{#2}{#3}}}}
+\newcommand{\TLoplr}[3]{\operatorname{\TLfont{\actlr{#1}{#2}{#3}}}}
+\newcommand{\TLbinlr}[3]{\mathbin{\TLoplr{#1}{#2}{#3}}}
+\newcommand{\CTLoplr}[4]{\operatorname{\TLfont{#1\actlr{#2}{#3}{#4}}}}
+
+% path quantifiers (future/past)
+\newcommand{\A}{\TLop{A}}
+\newcommand{\E}{\TLop{E}}
+\newcommand{\pA}{\TLop{\hat A}}
+\newcommand{\pE}{\TLop{\hat E}}
+
+% future, globally, until, weak until
+\newcommand{\F}{\TLop{F}}
+\newcommand{\Fl}[1]{\TLopl{F}{#1}}
+\newcommand{\Flr}[2]{\TLoplr{F}{#1}{#2}}
+\newcommand{\AF}{\CTLop{A}{F}}
+\newcommand{\AFl}[1]{\CTLopl{A}{F}{#1}}
+\newcommand{\AFlr}[2]{\CTLoplr{A}{F}{#1}{#2}}
+\newcommand{\EF}{\CTLop{E}{F}}
+\newcommand{\EFl}[1]{\CTLopl{E}{F}{#1}}
+\newcommand{\EFlr}[2]{\CTLoplr{E}{F}{#1}{#2}}
+\newcommand{\pAF}{\CTLop{\hat A}{F}}
+\newcommand{\pAFl}[1]{\CTLopl{\hat A}{F}{#1}}
+\newcommand{\pAFlr}[2]{\CTLoplr{\hat A}{F}{#1}{#2}}
+\newcommand{\pEF}{\CTLop{\hat E}{F}}
+\newcommand{\pEFl}[1]{\CTLopl{\hat E}{F}{#1}}
+\newcommand{\pEFlr}[2]{\CTLoplr{\hat E}{F}{#1}{#2}}
+\newcommand{\G}{\TLop{G}}
+\newcommand{\Gl}[1]{\TLopl{G}{#1}}
+\newcommand{\Glr}[2]{\TLoplr{G}{#1}{#2}}
+\newcommand{\AG}{\CTLop{A}{G}}
+\newcommand{\AGl}[1]{\CTLopl{A}{G}{#1}}
+\newcommand{\AGlr}[2]{\CTLoplr{A}{G}{#1}{#2}}
+\newcommand{\EG}{\CTLop{E}{G}}
+\newcommand{\EGl}[1]{\CTLopl{E}{G}{#1}}
+\newcommand{\EGlr}[2]{\CTLoplr{E}{G}{#1}{#2}}
+\newcommand{\pAG}{\CTLop{\hat A}{G}}
+\newcommand{\pAGl}[1]{\CTLopl{\hat A}{G}{#1}}
+\newcommand{\pAGlr}[2]{\CTLoplr{\hat A}{G}{#1}{#2}}
+\newcommand{\pEG}{\CTLop{\hat E}{G}}
+\newcommand{\pEGl}[1]{\CTLopl{\hat E}{G}{#1}}
+\newcommand{\pEGlr}[2]{\CTLoplr{\hat E}{G}{#1}{#2}}
+\newcommand{\U}{\TLop{U}}
+\newcommand{\Ul}[1]{\TLopl{U}{#1}}
+\newcommand{\Ulr}[2]{\TLoplr{U}{#1}{#2}}
+\newcommand{\AU}{\CTLop{A}{U}}
+\newcommand{\AUl}[1]{\CTLopl{A}{U}{#1}}
+\newcommand{\AUlr}[2]{\CTLoplr{A}{U}{#1}{#2}}
+\newcommand{\EU}{\CTLop{E}{U}}
+\newcommand{\EUl}[1]{\CTLopl{E}{U}{#1}}
+\newcommand{\EUlr}[2]{\CTLoplr{E}{U}{#1}{#2}}
+\newcommand{\pAU}{\CTLop{\hat A}{U}}
+\newcommand{\pAUl}[1]{\CTLopl{\hat A}{U}{#1}}
+\newcommand{\pAUlr}[2]{\CTLoplr{\hat A}{U}{#1}{#2}}
+\newcommand{\pEU}{\CTLop{\hat E}{U}}
+\newcommand{\pEUl}[1]{\CTLopl{\hat E}{U}{#1}}
+\newcommand{\pEUlr}[2]{\CTLoplr{\hat E}{U}{#1}{#2}}
+\newcommand{\W}{\TLop{W}}
+\newcommand{\Wl}[1]{\TLopl{W}{#1}}
+\newcommand{\Wlr}[2]{\TLoplr{W}{#1}{#2}}
+\newcommand{\AW}{\CTLop{A}{W}}
+\newcommand{\AWl}[1]{\CTLopl{A}{W}{#1}}
+\newcommand{\AWlr}[2]{\CTLoplr{A}{W}{#1}{#2}}
+\newcommand{\EW}{\CTLop{E}{W}}
+\newcommand{\EWl}[1]{\CTLopl{E}{W}{#1}}
+\newcommand{\EWlr}[2]{\CTLoplr{E}{W}{#1}{#2}}
+\newcommand{\pAW}{\CTLop{\hat A}{W}}
+\newcommand{\pAWl}[1]{\CTLopl{\hat A}{W}{#1}}
+\newcommand{\pAWlr}[2]{\CTLoplr{\hat A}{W}{#1}{#2}}
+\newcommand{\pEW}{\CTLop{\hat E}{W}}
+\newcommand{\pEWl}[1]{\CTLopl{\hat E}{W}{#1}}
+\newcommand{\pEWlr}[2]{\CTLoplr{\hat E}{W}{#1}{#2}}
+\newcommand{\wF}{\TLop{\widetilde F}}
+\newcommand{\wFl}[1]{\TLopl{\widetilde F}{#1}}
+\newcommand{\wFlr}[2]{\TLoplr{\widetilde F}{#1}{#2}}
+\newcommand{\AwF}{\CTLop{A}{\widetilde F}}
+\newcommand{\AwFl}[1]{\CTLopl{A}{\widetilde F}{#1}}
+\newcommand{\AwFlr}[2]{\CTLoplr{A}{\widetilde F}{#1}{#2}}
+
+% next
+\newcommand{\X}{\TLop{X}}
+\newcommand{\AX}{\CTLop{A}{X}}
+\newcommand{\EX}{\CTLop{E}{X}}
+\newcommand{\pAX}{\CTLop{\hat A}{X}}
+\newcommand{\pEX}{\CTLop{\hat E}{X}}
+\newcommand{\wX}{\TLop{\widetilde X}}
+\newcommand{\AwX}{\CTLop{A}{\widetilde X}}
