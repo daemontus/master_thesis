@@ -23,15 +23,26 @@ We will also use $s \dtsTransition{d} s'$ to denote $(s, d, s') \in \dtsT$ and $
 
 Intuitively ...
 
-To reason about the semantics of a \ac{DTS}, we define the notion of infinite runs. Let $M = \dtsTuple$ be a \ac{DTS}, then:
+\section{Time flow and runs in \ac{DTS}}
+
+In this work, we consider two possible semantics of a \ac{DTS}: past and future. Collectively, we refer to these as time flow. We will use prefix $\future$ to denote context where we consider the future semantics and $\past$ to denote context where the past semantics is considered. We also assume that the time flow can be negated, meaning $\withTime{\neg}\future \equiv \past$ and $\withTime{\neg}\past \equiv \future$.
+
+Let $M = \dtsTuple$ be a \ac{DTS}. In accordance with the above specified notation, we define the \emph{future transition relation} as $\future\dtsT = \dtsT$ and \emph{past transition relation} as $\past\dtsT = \{ (s', d, s) \mid (s, d, s') \in \future{\dtsT} \}$. Note that since $T$ is both total and past-total, both $\future\dtsT$ and $\past\dtsT$ are total.
+
+Let $t$ be one of $\future{}$ and $\past{}$. Then:
 
 \begin{itemize}
-	\item A \emph{future run} $\future{\pi}$ is an infinite sequence $s_0, d_0, s_1, d_1, s_2, \ldots$ such that $(s_i, d_{i}, s_{i+1}) \in \dtsT$ for all $i$;
-	\item A \emph{past run} $\past{\pi}$ is an infinite sequence $s_0, d_0, s_1, d_1, s_2, \ldots$ such that $(s_{i+1}, d_{i}, s_{i}) \in \dtsT$ for all $i$;
-	\item We will use $\pi$ to denote runs that can be both future or past;
-	\item We use $\pi_\dtsS(i)$ to denote $i$th state $s_i$ and $\pi_\dtsDir(i)$ to denote $i$th action $d_i$  of run $\pi$;
-	\item $\future{runs(s)}$ and $\past{runs(s)}$ denote the sets of all future and past runs respectively originating in the state $s$;
+	\item A \emph{run} $\withTime{t}\pi$ is an infinite sequence $s_0, d_0, s_1, d_1, s_2, \ldots$ such that $(s_i, d_{i}, s_{i+1}) \in \withTime{t}\dtsT$ for all $i$. If the time flow of the run is clear from context, we can omit the $\withTime{t}$ prefix;
+	\item $\withTime{t}\pi_\dtsS(i)$ denotes $i$th state $s_i$ and $\withTime{t}\pi_\dtsDir(i)$ denotes $i$th direction $d_i$ of the run $\withTime{t}\pi$;
+	\item $\withTime{t}\Pi_M$ denotes the set of all possible runs of the \ac{DTS} $M$;
+	\item Function $\withTime{t}runs_M : \dtsS \rightarrow 2^{\withTime{t}\Pi_M}$ computes all runs originating in the given state: $\withTime{t}runs_M(s) = \{ \pi \in \withTime{t}\Pi_M \mid \pi_\dtsS(0) = s\}$;
+	\item Function $\withTime{t}succ_M : \dtsS \rightarrow 2^{\dtsDir \times \dtsS}$ computes the successors of the given state:
+	$\withTime{t}succ_M(s) = \{ (d, s') \in \dtsDir \times \dtsS \mid (s,d,s') \in \withTime{t} \dtsT \}$;
+	\item Function $\withTime{t}pred_M : \dtsS \rightarrow 2^{\dtsDir \times \dtsS}$ computes the predecessors of the given state:
+	$\withTime{t}pred_M(s) = \withTime{\neg t}succ_M(s)$;
 \end{itemize}
+
+Whenever is the \ac{DTS} $M$ clear from context, we can omit the subscript $M$.
 
 \section{Direction formulae}
 
@@ -56,10 +67,10 @@ For a direction $\hat d$ is the satisfaction relation $\models$ then defined as 
 
 To reason about a \ac{DTS}, we define the following \ac{HUCTLp} logic.
 
-Let $p$ be an atomic proposition from set $\dtsAP$, $d$ a direction formula over $\dtsDir$,  $t$ one of $\{ \future{}, \past{} \}$ and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
+Let $p$ be an atomic proposition from set $\dtsAP$, $d$ a direction formula over $\dtsDir$,  $t$ one of the time flows ($\future{}$ or $\past{}$), and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
 
 \begin{align*}
-	\varphi 	&::= 	\true \mid p \mid x \mid  \neg \varphi \mid \hctlBind{x} \varphi \mid \hctlAt{x} \varphi \mid \hctlExists{x} \varphi  \mid \varphi \land \varphi \mid \withTime{\ctlE \psi} \mid \withTime{\ctlA \psi} \\
+	\varphi 	&::= 	\true \mid p \mid x \mid  \neg \varphi \mid \hctlBind{x} \varphi \mid \hctlAt{x} \varphi \mid \hctlExists{x} \varphi  \mid \varphi \land \varphi \mid \withTime{t}\ctlE \psi \mid \withTime{t}\ctlA \psi \\
 	\psi 		  &::= 	  \dctlX{\chi} \varphi \mid
 	\varphi \dctlUl{\chi} \varphi \mid
 	\varphi \dctlUlr{\chi}{\chi} \varphi \mid
@@ -69,9 +80,11 @@ Let $p$ be an atomic proposition from set $\dtsAP$, $d$ a direction formula over
 
 We call the formulae defined by $\varphi$ a \emph{state formulae} and the formulae defined by $\psi$ a \emph{path formulae}. 
 
+Note that in situations where the aspect of time flow is irrelevant (i.e. when the statement holds for both the past and the future), we can omit the time flow prefix.
+
 \emph{Model of state formula is a state + valuation. Model of path formula is a run + valuation.}
 
-To define the semantics of \ac{HUCTLp} over a \ac{DTS}, we have to extend the model with a valuation of state variables $h : \var \to \dtsS$. We will use $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to state $s$ but is otherwise defined as valuation $h$. Formally:
+To define the semantics of \ac{HUCTLp} over a \ac{DTS}, we have to extend the model with a valuation of state variables $h : \var \to \dtsS$. We will use $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to state $s$ but is otherwise defined as valuation $h$. Furthermore, we write $h_0$ to denote an empty valuation. Formally:
 \[
 	h[x \mapsto s](x') = \begin{cases}
 		s & x' = x \\
@@ -83,17 +96,75 @@ Let $M = \dtsTuple$ be \ac{DTS} and $h : \var \to \dtsS$ a valuation of state va
 
 \begin{alignat*}{2}
 	(M,h,s) &\models \true	\\
-	(M,h,s) &\models p											   && \iff p \in \dtsL(s) \\
-	(M,h,s) &\models x											   && \iff h(x) = s \\
-	(M,h,s) &\models \neg \varphi  							  && \iff (M, h,s) \not\models \varphi \\
-	(M,h,s) &\models \hctlBind{x} \varphi 				   && \iff (M,h[x \mapsto s], s) \models \varphi \\
-	(M,h,s) &\models \hctlAt{x} \varphi 					&& \iff (M,h,h(x)) \models \varphi \\
-	(M,h,s) &\models \hctlExists{x} \varphi 			  && \iff \exists s' \in \dtsS :  (M,h[x \mapsto s'], s) \models \varphi \\	
-	(M,h,s) &\models \varphi_1 \land \varphi_2 			&& \iff (M,h,s) \models \varphi_1 \text{ and } (M,h,s) \models \varphi_2  \\
-	(M,h,s) &\models \withTime{\ctlE \psi} 				  && \iff \exists \pi \in \withTime{runs} : (M,h,\pi) \models \psi \\
-	(M,h,s) &\models \withTime{\ctlA \psi} 				  && \iff \forall \pi \in \withTime{runs} : (M,h,\pi) \models \psi \\	
+	(M,h,s) &\models p										   && \iff p \in \dtsL(s) \\
+	(M,h,s) &\models x										   && \iff h(x) = s \\
+	(M,h,s) &\models \neg \varphi  						  && \iff (M, h,s) \not\models \varphi \\
+	(M,h,s) &\models \hctlBind{x} \varphi 			   && \iff (M,h[x \mapsto s], s) \models \varphi \\
+	(M,h,s) &\models \hctlAt{x} \varphi 				&& \iff (M,h,h(x)) \models \varphi \\
+	(M,h,s) &\models \hctlExists{x} \varphi 		  && \iff \exists s' \in \dtsS :  (M,h[x \mapsto s'], s) \models \varphi \\	
+	(M,h,s) &\models \varphi_1 \land \varphi_2 	   && \iff (M,h,s) \models \varphi_1 \text{ and } (M,h,s) \models \varphi_2  \\
+	(M,h,s) &\models \withTime{t}\ctlE \psi 			 && \iff \exists \pi \in \withTime{t}runs : (M,h,\pi) \models \psi \\
+	(M,h,s) &\models \withTime{t}\ctlA \psi 			 && \iff \forall \pi \in \withTime{t}runs : (M,h,\pi) \models \psi \\	
 \end{alignat*}
 
 \begin{alignat*}{2}
-	(M,h,\pi) &\models \dctlX{\chi} \varphi				   && \iff \pi_\dtsDir(0) \models \chi \text{ and } (M, h, \pi_\dtsS(1)) \models \varphi \\
+	(M,h,\pi) &\models \dctlX{\chi} \varphi								& \iff & \pi_\dtsDir(0) \models \chi \text{ and } (M, h, \pi_\dtsS(1)) \models \varphi \\
+	(M,h,\pi) &\models \varphi_1 \dctlUl{\chi} \varphi_2		  & \iff & \exists i : \pi_\dtsS(i) \models \varphi_2 \text{ and } \\
+				  &																		 & 		 & \forall j < i : \pi_\dtsS(j) \models \varphi_1 \land \pi_\dtsDir(j) \models \chi \\
+	(M,h,\pi) &\models \varphi_1 \dctlUlr{\chi}{\xi} \varphi_2 	 & \iff & \exists i > 0 : \pi_\dtsS(i) \models \varphi_2 \land \pi_\dtsS(i-1) \models \varphi_1 \land \pi_\dtsDir(i-1) \models \xi  \text{ and } \\
+				  & 																	  & 	 & \forall j < i - 1 : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(j) \models \chi \\
+	(M,h,\pi) &\models \varphi_1 \dctlWl{\chi} \varphi_2		  & \iff & (M,h,\pi) \models \varphi_1 \dctlUl{\chi} \varphi_2 \text{ or } \\
+				  &																		 & 		 & \forall i : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(i) \models \chi \\
+	(M,h,\pi) &\models \varphi_1 \dctlWlr{\chi}{\xi} \varphi_2		  & \iff & (M,h,\pi) \models \varphi_1 \dctlUlr{\chi}{\xi} \varphi_2 \text{ or } \\
+&																		 & 		 & \forall i : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(i) \models \chi \\
 \end{alignat*}
+
+Apart from these basic operators, we will use the following list of abbreviations:
+\begin{align*}
+	\dctlF{\chi} \varphi 				 & \equiv true \dctlUl{\chi} \varphi \\
+	\dctlG{\chi} \varphi 				& \equiv \varphi \dctlWl{\chi} false \\
+	\ctlX \varphi							& \equiv \dctlX{true} \varphi \\ 
+	\ctlF \varphi 							& \equiv \dctlF{true} \varphi \\
+	\ctlG \varphi 							& \equiv \dctlG{true} \varphi  \\
+	\varphi_1 \ctlU \varphi_2 		 & \equiv \varphi_1 \dctlUl{true} \varphi_2 \\
+	\varphi_1 \ctlW \varphi_2 		& \equiv \varphi_1 \dctlWl{true} \varphi_2 \\
+	\dctlXW{\chi} \varphi			  & \equiv \neg \dctlX{\chi} \neg \varphi \\
+	\dctlFW{\chi} \varphi 			   & \equiv \neg \dctlG{\chi} \neg \varphi \\
+\end{align*}
+
+Note that the standard equivalence $\ctlF \varphi \equiv \neg \ctlG \neg \varphi$ does not hold in general, therefore we introduce the weak operators. however, also note that when the notion of directions is removed ($\chi = true$), the equality holds. 
+
+\emph{Add example on how weak-strong duality works (first-order operators are flipped)}
+
+Finally, please note the following equivalences:
+
+\begin{align*}
+	\varphi_1 \dctlUlr{\chi}{\xi} \varphi_2						& \equiv \varphi_1 \dctlUl{\chi} (\varphi_1 \land \dctlX{\xi} \varphi_2)  \\
+	\varphi_2 \dctlWlr{\chi}{\xi} \varphi_2 				   & \equiv \varphi_1 \dctlWl{\chi} (\varphi_1 \land \dctlX{\xi} \varphi_2) \\
+	\ctlA[\varphi_1 \dctlWl{\chi} \varphi_2] 				  & \equiv \neg \ctlE[ \neg \varphi_2 \ctlU (\neg \varphi_2 \land (\neg \varphi_1 \lor \ctlE \dctlX{\neg\chi} true)) ] \\
+	\ctlE[\varphi_1 \dctlWl{\chi} \varphi_2] 				  & \equiv \ctlE[\varphi_1 \dctlUl{\chi} \varphi_2] \lor \neg \ctlA \dctlFW{\chi} \neg \varphi_1 \\
+\end{align*}
+
+Based on these observations, we can see that all these operators can be translated to this set of temporal operators $\dctlX{\chi}, \dctlXW{\chi}, \dctlFW{\chi}, \dctlUl{\chi}$ combined with both path quantifiers $\withTime{t}\ctlE$ and $\withTime{t}\ctlA$.
+
+\section{\Acl{PDTS}}
+
+We extend the definition of \ac{DTS} with the notion of parameters. A \ac{PDTS} is essentially a family of \acp{DTS} that share the same state space, but differ in terms of transition relations.
+
+Let \acl{PDTS} be a tuple $\mathcal{K} = \pdtsTuple$  where $\pdtsP$ is a finite set of parameter valuations and $\pdtsT = \{ \dtsT_p \mid p \in \pdtsP : \dtsT_p \subseteq \dtsS \times \dtsDir \times \dtsS \}$. We then write $\mathcal{K}_p$ to denote a \ac{DTS} such that $\mathcal{K}_p = (\dtsS, \dtsDir, \dtsT_p, \dtsAP, \dtsL)$.
+
+Furthermore, we define a \emph{joint transition relation} $TP \subseteq \dtsS \times \dtsDir \times \dtsS \times 2^{\pdtsP}$ as $TP = \{ (s, d, s', P) \mid P \subseteq \pdtsP \text{ is the largest set s. t. } \forall p \in P : (s, d, s') \in \dtsT_p \}$.
+
+\begin{itemize}
+	\item The notion of time-flows naturally extends also to \acp{PDTS} and to the joint transition relation.
+	\item The notion of runs applies only to the underlying $\mathcal{K}_p$
+	\item $\withTime{t}\Pi_\mathcal{K} = \bigcup_{p \in \pdtsP} \withTime{t}\Pi_{\mathcal{K}_p}$
+	\item $\withTime{t}runs(s) = \{ \pi \in \withTime{t}\Pi_\mathcal{K} \mid \pi_\dtsS(0) = s \}$
+	\item $\withTime{t}succ(s) = \{ (s, d, P) \in \dtsS \times \dtsDir \times 2^\pdtsP \mid P \subseteq \pdtsP  }$
+\end{itemize}
+
+Similar to \ac{DTS}, we write $s \pdtsTransition{d}{p} s'$ when $(s, d, s') \in \dtsT_p$. 
+
+\section{Parameter Synthesis}
+
+The parameter synthesis problem for \ac{PDTS} $\mathcal{K}$ and \ac{HUCTLp} formula $\varphi$ is to compute function $\mathcal{F}^\mathcal{K}_\varphi$ such that $\mathcal{F}^\mathcal{K}_\varphi(s) = \{p \in \pdtsP \mid (\mathcal{K}_p, s) \models \varphi\}$.

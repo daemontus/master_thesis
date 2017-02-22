@@ -136,9 +136,9 @@
 
 %% Notion of time
 
-\newcommand{\future}[1]{{}^\vartriangleright#1}
-\newcommand{\past}[1]{{}^\vartriangleleft#1}
-\newcommand{\withTime}[1]{{}^t#1}
+\newcommand{\future}{{}^\vartriangleright}
+\newcommand{\past}{{}^\vartriangleleft}
+\newcommand{\withTime}[1]{{}^{#1}}
 
 %% Transition System
 
@@ -185,7 +185,14 @@
 \newcommand{\ctlDir}[1]{{}_{#1}}
 
 \newcommand{\ctlX}{\ctlOp{X}}
-\newcommand{\dctlX}[1]{\ctlDir{#1}\ctlOp{X}}
+\newcommand{\dctlX}[1]{\ctlOp{X}\ctlDir{#1}}
+\newcommand{\dctlXW}[1]{\ctlOp{\widetilde{X}}\ctlDir{#1}}
+\newcommand{\ctlF}{\ctlOp{F}}
+\newcommand{\dctlF}[1]{\ctlDir{#1}\ctlOp{F}}
+\newcommand{\dctlFW}[1]{\ctlDir{#1}\ctlOp{\widetilde{F}}}
+\newcommand{\ctlG}{\ctlOp{G}}
+\newcommand{\dctlG}[1]{\ctlDir{#1}\ctlOp{G}}
+\newcommand{\ctlU}{\ctlOp{U}}
 \newcommand{\dctlUl}[1]{\ctlDir{#1}\ctlOp{U}}
 \newcommand{\dctlUlr}[2]{\ctlDir{#1}\ctlOp{U}_{#2}}
 \newcommand{\ctlW}{\ctlOp{W}}
@@ -200,3 +207,15 @@
 	short = HUCTL$_\text{P}$,
 	long = hybrid computation tree logic with past
 }
+
+%% Parametrised Direction Transition System
+
+\DeclareAcronym{PDTS}{
+	short = PDTS, 
+	long = parametrised direction transition system
+}
+
+\newcommand{\pdtsT}{\hat{T}}
+\newcommand{\pdtsP}{\mathcal{P}}
+\newcommand{\pdtsTuple}{\ensuremath{(\pdtsP, \dtsS, \dtsDir, \pdtsT, \dtsAP, \dtsL)}}
+\newcommand{\pdtsTransition}[2]{\stackrel{#1}{\rightarrow}_#2}
