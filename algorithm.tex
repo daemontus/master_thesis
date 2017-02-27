@@ -1,0 +1,59 @@
+In this section, we describe the algorithm used for the parameter synthesis computation.
+
+\section{Environment and data structures}
+
+The algorithm presented in this work assumes a distributed environment of $N$ independent, reliable agents connected using reliable communication channels. In practice, such model is suitable to model multi core machines and small to medium computational clusters where fault tolerance is not strictly necessary. In the end of this chapter we will shortly explore the possibilities of extending the algorithm to include basic fault tolerance capabilities. 
+
+We assume that each agent has access to the following data structures:
+
+\begin{itemize}
+	\item Total number of communicating agents $N$;
+	\item A unique agent identifier $id \in \{ 1, \ldots, N \}$;
+	\item A \ac{PDTS} $\mathcal{K} = \pdtsTuple$;
+	\item A \ac{HUCTLp} formula $\varphi$;
+	\item A partition function $f : \dtsS \to \{1, \ldots, N \}$
+	\item For each sub-formula $\psi \in cl(\varphi)$ an assumption assignment $\mathcal{F}_\psi : \dtsS \to 2^\pdtsP$;
+\end{itemize}
+
+\section{Algorithm outline}
+
+The algorithm is divided into two parts: The main execution loop and the operator logic. Each operator is responsible for propagating 
+
+In this section, we describe the main execution loop while the following sections are devoted to the specific operators.
+
+\begin{algorithmic}
+	\Function{ParameterSynthesis}{}
+		\State \text{partition $\mathcal{K}$ into partitions $\mathcal{K}_1, ..., \mathcal{K}_N$}
+		\State \text{parallel for each $\mathcal{K}_i$:}
+		\State \text{assign proposition assumptions}
+		\Repeat
+			\Repeat
+				\While{has task}
+					\State \text{process task}
+				\EndWhile
+				\State \text{exchange data about border states}
+			\Until{\Call{TerminationDetection}{}}
+			\State \text{update cycles}
+		\Until{\Call{TerminationDetection}{}}
+	\EndFunction
+	
+	\Function{ProcessTask}{$\phi_1, s, h$}
+		\ForAll{$\psi \in cl(\varphi) : \psi = \withTime{t}\ctlE\dctlX{\chi} \phi_1$}
+			\ForAll{$ p \in \withTime{t}pred(s) : f(p) = id $}
+				\State $witnesses \gets \{ \Phi_1 \land \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^t(ss, \phi_1, h) \}$
+				\State $counterExamples \gets (\{ \neg\Phi_1 \lor \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^f(ss, \phi_1, h)  \}  \}) $
+				\State $\mathcal{A}^t \gets \bigvee_{\Phi \in witnesses} \Phi$
+				\State $\mathcal{A}^f \gets tt \land \bigwedge counterExamples$
+			\EndFor
+		\EndFor
+		\ForAll{$\psi \in cl(\varphi) : \psi = \withTime{t}\ctlA\dctlX{\chi} \phi_1$}
+			\ForAll{$ p \in \withTime{t}pred(s): f(p) = id $}
+				\State $witnesses \gets \{ \Phi_1 \land \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^t(ss, \phi_1, h) \}$
+				\State $counterExamples \gets (\{ \neg\Phi_1 \lor \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^f(ss, \phi_1, h)  \} \lor \{  \}) $
+				\State $\mathcal{A}^f \gets \bigvee_{\Phi \in witnesses} \Phi$
+				\State $\mathcal{A}^t \gets tt \land \bigwedge counterExamples$
+			\EndFor			
+		\EndFor		
+	\EndFunction
+	
+\end{algorithmic}

@@ -67,18 +67,30 @@ For a direction $\hat d$ is the satisfaction relation $\models$ then defined as 
 
 To reason about a \ac{DTS}, we define the following \ac{HUCTLp} logic.
 
-Let $p$ be an atomic proposition from set $\dtsAP$, $d$ a direction formula over $\dtsDir$,  $t$ one of the time flows ($\future{}$ or $\past{}$), and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
+Let $p$ be an atomic proposition from the $\dtsAP$ set, $d$ a direction formula over $\dtsDir$,  $t$ one of the time flows ($\future{}$ or $\past{}$), and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
 
 \begin{align*}
-	\varphi 	&::= 	\true \mid p \mid x \mid  \neg \varphi \mid \hctlBind{x} \varphi \mid \hctlAt{x} \varphi \mid \hctlExists{x} \varphi  \mid \varphi \land \varphi \mid \withTime{t}\ctlE \psi \mid \withTime{t}\ctlA \psi \\
-	\psi 		  &::= 	  \dctlX{\chi} \varphi \mid
+	\varphi 	&::= 	\true 
+	\mid p 
+	\mid x 
+	\mid  \neg \varphi 
+	\mid \hctlBind{x} \varphi 
+	\mid \hctlAt{x} \varphi 
+	\mid \hctlExists{x} \varphi 
+	\mid \varphi \land \varphi 
+	\mid \withTime{t}\ctlE \psi 
+	\mid \withTime{t}\ctlA \psi 
+	\\
+	\psi 		  &::= 	  
+	\dctlX{\chi} \varphi \mid
 	\varphi \dctlUl{\chi} \varphi \mid
 	\varphi \dctlUlr{\chi}{\chi} \varphi \mid
 	\varphi \dctlWl{\chi} \varphi \mid
 	\varphi \dctlWlr{\chi}{\chi} \varphi
+	\\
 \end{align*}
 
-We call the formulae defined by $\varphi$ a \emph{state formulae} and the formulae defined by $\psi$ a \emph{path formulae}. 
+We call the formulae defined by $\varphi$ a \emph{state formulae} and the formulae defined by $\psi$ a \emph{path formulae}. We write $cl(\varphi)$ to denote the set of all sub-formulae of $\varphi$.
 
 Note that in situations where the aspect of time flow is irrelevant (i.e. when the statement holds for both the past and the future), we can omit the time flow prefix.
 
@@ -159,12 +171,31 @@ Furthermore, we define a \emph{joint transition relation} $TP \subseteq \dtsS \t
 	\item The notion of time-flows naturally extends also to \acp{PDTS} and to the joint transition relation.
 	\item The notion of runs applies only to the underlying $\mathcal{K}_p$
 	\item $\withTime{t}\Pi_\mathcal{K} = \bigcup_{p \in \pdtsP} \withTime{t}\Pi_{\mathcal{K}_p}$
-	\item $\withTime{t}runs(s) = \{ \pi \in \withTime{t}\Pi_\mathcal{K} \mid \pi_\dtsS(0) = s \}$
-	\item $\withTime{t}succ(s) = \{ (s, d, P) \in \dtsS \times \dtsDir \times 2^\pdtsP \mid P \subseteq \pdtsP  }$
+	\item $\withTime{t}runs_\mathcal{K}(s) = \{ \pi \in \withTime{t}\Pi_\mathcal{K} \mid \pi_\dtsS(0) = s \}$
+	\item $\withTime{t}succ_\mathcal{K}(s) = \{ (s', d, P) \in \dtsS \times \dtsDir \times 2^\pdtsP \mid (s, d, s', P) \in TP \}$
+	\item $\withTime{t}pred_\mathcal{K}(s) = \withTime{\neg t}succ_\mathcal{K}(s)$
 \end{itemize}
 
 Similar to \ac{DTS}, we write $s \pdtsTransition{d}{p} s'$ when $(s, d, s') \in \dtsT_p$. 
 
 \section{Parameter Synthesis}
 
-The parameter synthesis problem for \ac{PDTS} $\mathcal{K}$ and \ac{HUCTLp} formula $\varphi$ is to compute function $\mathcal{F}^\mathcal{K}_\varphi$ such that $\mathcal{F}^\mathcal{K}_\varphi(s) = \{p \in \pdtsP \mid (\mathcal{K}_p, s) \models \varphi\}$.
+The parameter synthesis problem for \ac{PDTS} $\mathcal{K} : \dtsS \to 2^\pdtsP$ and \ac{HUCTLp} formula $\varphi$ is to compute function $\mathcal{F}^\mathcal{K}_\varphi$ such that $\mathcal{F}^\mathcal{K}_\varphi(s) = \{p \in \pdtsP \mid (\mathcal{K}_p, s) \models \varphi\}$.
+
+Discrete bifurcation analysis is ...
+
+\section{Partitioning of a \ac{PDTS}}
+
+In order to distribute the \ac{PDTS} to several independent workers, we define the notion of \emph{partitions}. Any \ac{PDTS} can be divided into $N$ partitions using a injective partition function $f: \dtsS \to \{1, \ldots, N \}$. Intuitively, the partition function divides the state space of a \ac{PDTS} into $N$ disjoint groups (some of which may be empty) which we then call partitions. Such partitions can then be distributed to several independent agents to reduce the amount of resources required by a singular agent. However, this also usually introduces a communication overhead. 
+
+We say that an agent $i$ \emph{owns} a state $s$ when the state is part of the agents partition, that is $f(s) = i$. We also call these states \emph{local}. All states that are not owned by the agent $i$ are then referred to as \emph{remote}.
+
+When designing an effective partition function, one has to consider two key factors:
+\begin{itemize}
+	\item  \emph{The uniformity of the partitioning}. That is, to ensure that the sizes of the partitions are always almost equal. Naturally, exact equality can't always be achieved, however, a good uniform partition function should ensure that the maximum size difference between partitions does not grow with the size of the system, but rather with the number of partitions.
+	\item \emph{Number of cross transitions}. A cross transition is a transition that leads between two states in different partitions of the system. Such transition is usually a source of communication overhead, since any related operation usually involves both agents. Hence the amount of cross transitions directly influences the overall communication overhead.
+\end{itemize}
+
+As we can see, in order to achieve good performance, the partition function needs to satisfy both of these properties. However, this can't be easily achieved for all systems. Without any prior knowledge of the system, one could design a partition function that would be close to uniformity, but that might also introduce a significant amount of cross transitions. Similarly, if one were to focus on optimizing the amount of cross transition, the resulting partitioning might not be uniform enough to distribute to agents with limited resources.
+
+Later in this work, we are going to describe how to exploit specific properties of biological models to design partitioning that is both uniform and which ensures on average a small amount of cross transitions.
