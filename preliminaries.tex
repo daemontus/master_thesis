@@ -185,7 +185,7 @@ As one can easily observe, by using $true$ as a direction formula, the direction
 \subsection{Weak operators}
 \label{sec:weak}
 
-When understanding \ac{HUCTLp} formulas, one has to keep in mind one important distinction between classic \ac{CTL} and \ac{HUCTLp}. In \ac{CTL}, the following equivalences hold universally:
+When understanding \ac{HUCTLp} formulas, one has to keep in mind an important distinction between classic \ac{CTL} and \ac{HUCTLp}. In \ac{CTL}, the following equivalences hold universally:
 
 \begin{align*}
 	\neg \ctlA\ctlX \neg \varphi 			& \equiv \ctlE\ctlX \varphi &
@@ -264,6 +264,8 @@ Let \acl{PDTS} be a tuple $\mathcal{K} = \pdtsTuple$  where $\pdtsP$ is a finite
 
 We will write $\tP{s}{t}$ to denote the set of all parameter valuations for which the transition from $s$ to $t$ is allowed: $\tP{s}{t} = \{ p \in \pdtsP \mid \exists d \in \dtsDir : (s, d, p, t) \in \pdtsT \}$. The notion of time flows also naturally extends to \acp{PDTS} with $\future\pdtsT = \pdtsT$ and $\past\pdtsT = \{ (s, d, p, s') \mid (s', d, p, s) \in \pdtsT \}$.
 
+TODO: define transitions with d,p, with d, and without anything
+
 \subsection{Parameter representation}
 
 In this work, we assume that the parameters of the \ac{PDTS} are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $\tP{s}{t} = \{ p \in \pdtsP \mid p \models \Phi \}$. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will also use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} formulae.
@@ -282,16 +284,21 @@ The parameter synthesis problem for a \ac{PDTS} $\mathcal{K}$, an initial parame
 
 \section{Partitioning and \ac{PDTS} fragments}
 
-In order to distribute the \ac{PDTS} to several independent workers, we define the notion of \emph{fragments}. Any \ac{PDTS} can be divided into $N$ fragments using an injective partition function $f: \dtsS \to \{1, \ldots, N \}$. Intuitively, the partition function divides the state space of a \ac{PDTS} into $N$ disjoint groups (some of which may be empty) which we then call fragments. Such partitions can be then distributed to several independent agents to reduce the amount of resources required by a singular agent. However, this also usually introduces a communication overhead. 
+In order to distribute the \ac{PDTS} to several independent workers, we define the notion of \emph{fragments}. Any \ac{PDTS} can be divided into $N$ fragments using an injective partition function $f: \dtsS \to \{1, \ldots, N \}$. Intuitively, the partition function divides the state space of a \ac{PDTS} into $N$ disjoint groups (some of which may be empty) which we then call fragments. Such partitions can be then distributed to several independent agents to reduce the amount of resources required by a singular agent. However, this also usually introduces communication overhead. 
 
-We say that an agent $i$ \emph{owns} a state $s$ when the state is part of the agents partition, that is $f(s) = i$. We also call these states \emph{local}. All states that are not owned by the agent $i$ are then referred to as \emph{remote}.
+We say that an agent $i$ \emph{owns} a state $s$ when the state is part of the agents fragment, that is $f(s) = i$. We also call these states \emph{local} and denote the set of all local states of the fragment $i$ as $\dtsSlocal_i$. Note that the sets of local states of each fragment are pairwise disjoint and their union constitutes the full state space $\dtsS$. 
 
-When designing an effective partition function, one has to consider two key factors:
+All states that are not local, but can directly reach or be reached from a local state are called border states of fragment $i$ and are denoted $\dtsSborder_i$. Formally, state $s \in \dtsS \setminus \dtsSlocal_i$ is a border state if and only if there exists $t \in \dtsSlocal_i$ such that $s \tsTransition t$ or $t \tsTransition s$. Please observe that the border state sets for different fragments can intersect and if $s$ is a border state in fragment $i$, then $t$ is a border state in fragment $f(s)$.
+
+Finally, all states which are not local nor border states are called remote. The set of all remote states is denoted $\dtsSremote_i$. Furthermore, for each fragment $i$ holds that $\dtsS = \dtsSlocal_i \cup \dtsSborder_i \cup \dtsSremote_i$ and that $\emptyset = \dtsSlocal_i \cap \dtsSborder_i \cap \dtsSremote_i$.
+
+In this section, we also define two key properties of a partition function that influence the overall effectiveness of resource distribution and the expected communication overhead:
+
 \begin{itemize}
-	\item  \emph{The uniformity of the partitioning}. That is, to ensure that the sizes of the partitions are always almost equal. Naturally, exact equality can't always be achieved, however, a good uniform partition function should ensure that the maximum size difference between partitions does not grow with the size of the system, but rather with the number of partitions.
-	\item \emph{Number of cross transitions}. A cross transition is a transition that leads between two states in different partitions of the system. Such transition is usually a source of communication overhead, since any related operation usually involves both agents. Hence the amount of cross transitions directly influences the overall communication overhead.
+	\item  \emph{The uniformity of the partitioning}. That is, to ensure that the sizes of $\dtsSlocal_i$ are always almost equal. Naturally, exact equality can't always be achieved, however, a good uniform partition function should ensure that the maximum size difference between fragments does not grow with the size of the system, but rather with the number of partitions.
+	\item \emph{Number of cross transitions}. A cross transition is a transition that leads between two states in different fragments of the system. Such transition is usually a source of communication overhead, since any related operation usually involves both fragments. Hence the amount of cross transitions directly influences the overall communication overhead. Also observe that this number is very closely related to the size of the $\dtsSborder_i$ sets, since the states at each end of the cross transitions will be considered as border states in one of the fragments.
 \end{itemize}
 
-As we can see, in order to achieve good performance, the partition function needs to satisfy both of these properties. However, this can't be easily achieved for all systems. Without any prior knowledge of the system, one could design a partition function that would be close to uniformity, but that might also introduce a significant amount of cross transitions. Similarly, if one were to focus on optimizing the amount of cross transition, the resulting partitioning might not be uniform enough to distribute to agents with limited resources.
+As we can see, in order to achieve good performance, the partition function needs to satisfy both of these properties. However, this can't be easily achieved for all systems. Without any prior knowledge of the system, one could design a partition function that would be close to uniformity, but that might also introduce a significant amount of cross transitions. Similarly, if one were to focus on optimizing the amount of cross transition, the resulting partitioning might not be uniform enough to be able to distribute to agents with limited resources.
 
 Later in this work, we are going to describe how to exploit specific properties of biological models to design partitioning that is both uniform and which ensures on average a small amount of cross transitions.
