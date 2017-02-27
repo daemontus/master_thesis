@@ -91,8 +91,8 @@
 %}}}
 
 %{{{ True, false
-\newcommand{\ttrue}{\ensuremath{\texttt{tt}}}
-\newcommand{\ffalse}{\ensuremath{\texttt{ff}}}
+%\newcommand{\ttrue}{\ensuremath{\texttt{tt}}}
+%\newcommand{\ffalse}{\ensuremath{\texttt{ff}}}
 %}}}
 %{{{ assumption function
 \newcommand{\as}[1][]{\ensuremath{\mathcal{A}_{#1}}}
@@ -163,6 +163,7 @@
 \newcommand{\dtsDir}{\mathit{Dir}}
 \newcommand{\dtsAP}{\tsAP}
 \newcommand{\dtsL}{\tsL}
+\newcommand{\tD}[2]{\ensuremath{\mathcal{D}(#1, #2)}}
 
 \newcommand{\dtsTuple}{\ensuremath{(\dtsS, \dtsDir, \dtsT, \dtsAP, \dtsL)}}
 
@@ -201,13 +202,19 @@
 \newcommand{\dctlWl}[1]{\ctlDir{#1}\ctlOp{W}}
 \newcommand{\dctlWlr}[2]{\ctlDir{#1}\ctlOp{W}_{#2}}
 
-\newcommand{\hctlBind}[1]{\fix #1.}
-\newcommand{\hctlAt}[1]{\jump #1.}
-\newcommand{\hctlExists}[1]{\exists #1.}
+\newcommand{\hctlBind}[1]{\fix #1 : }
+\newcommand{\hctlAt}[1]{\jump #1 : }
+\newcommand{\hctlExists}[1]{\exists #1 : }
+\newcommand{\hctlForall}[1]{\forall #1 : }
 
 \DeclareAcronym{HUCTLp}{
 	short = HUCTL$_\text{P}$,
 	long = hybrid computation tree logic with past
+}
+
+\DeclareAcronym{CTL}{
+	short = CTL , 
+	long = computation tree logic
 }
 
 %% Parametrised Direction Transition System
@@ -217,7 +224,13 @@
 	long = parametrised direction transition system
 }
 
+\newcommand{\tP}[2]{\ensuremath{\mathcal{P}(#1, #2)}}
 \newcommand{\pdtsT}{\hat{T}}
 \newcommand{\pdtsP}{\mathcal{P}}
 \newcommand{\pdtsTuple}{\ensuremath{(\pdtsP, \dtsS, \dtsDir, \pdtsT, \dtsAP, \dtsL)}}
 \newcommand{\pdtsTransition}[2]{\stackrel{#1}{\rightarrow}_#2}
+
+%% Parameter sets
+
+\newcommand{\ttrue}{\texttt{tt}}
+\newcommand{\ffalse}{\texttt{ff}}

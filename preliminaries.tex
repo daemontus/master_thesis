@@ -19,6 +19,8 @@ A \emph{\acl{DTS}} (\acs{DTS}) is a tuple $\dtsTuple$, where:
 	\item $L : \dtsS \rightarrow 2^\dtsAP$ is a labelling function that associates a subset of $\dtsAP$ to each state.
 \end{itemize}
 
+We will use the notation $\tD{s}{t}$ to denote the set of all directions between two states: $\tD{s}{t} = \{ d \in \dtsDir \mid (s, d, t) \in \dtsT \}$ (Note that this set either contains just one element or all elements of $\dtsDir$).
+
 We will also use $s \dtsTransition{d} s'$ to denote $(s, d, s') \in \dtsT$ and $s \tsTransition s'$ if there exists $d \in \dtsDir$ such that $s \dtsTransition{d} s'$.
 
 Intuitively ...
@@ -67,6 +69,8 @@ For a direction $\hat d$ is the satisfaction relation $\models$ then defined as 
 
 To reason about a \ac{DTS}, we define the following \ac{HUCTLp} logic.
 
+\subsection{Syntax}
+
 Let $p$ be an atomic proposition from the $\dtsAP$ set, $d$ a direction formula over $\dtsDir$,  $t$ one of the time flows ($\future{}$ or $\past{}$), and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
 
 \begin{align*}
@@ -90,13 +94,16 @@ Let $p$ be an atomic proposition from the $\dtsAP$ set, $d$ a direction formula 
 	\\
 \end{align*}
 
-We call the formulae defined by $\varphi$ a \emph{state formulae} and the formulae defined by $\psi$ a \emph{path formulae}. We write $cl(\varphi)$ to denote the set of all sub-formulae of $\varphi$.
+We call all $\varphi$ formulae \emph{state formulae} and all $\psi$ formulae $\psi$ \emph{path formulae}. We write $cl(\varphi)$ to denote the set of all sub-formulae of $\varphi$.
 
-Note that in situations where the aspect of time flow is irrelevant (i.e. when the statement holds for both the past and the future), we can omit the time flow prefix.
+\textbf{?}Note that in situations where the aspect of time flow is irrelevant (i.e. when the statement holds for both the past and the future), we can omit the time flow prefix.
 
-\emph{Model of state formula is a state + valuation. Model of path formula is a run + valuation.}
+\subsection{Semantics}
 
-To define the semantics of \ac{HUCTLp} over a \ac{DTS}, we have to extend the model with a valuation of state variables $h : \var \to \dtsS$. We will use $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to state $s$ but is otherwise defined as valuation $h$. Furthermore, we write $h_0$ to denote an empty valuation. Formally:
+In order to describe semantics of the \ac{HUCTLp} as a whole, we will define the semantics of the state and path formulae separately. The model of a state formula over \ac{DTS} $M$ is a state $s$ while the model of a path formula is a run $\pi$. Furthermore, each model is extended with a partial function $h : \var \to \dtsS$, which represents the valuation of the state variables.
+
+We write $h_0$ to denote an empty valuation and $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to state $s$ but is otherwise defined as valuation $h$, formally:
+
 \[
 	h[x \mapsto s](x') = \begin{cases}
 		s & x' = x \\
@@ -104,7 +111,7 @@ To define the semantics of \ac{HUCTLp} over a \ac{DTS}, we have to extend the mo
 	\end{cases}
 \]
 
-Let $M = \dtsTuple$ be \ac{DTS} and $h : \var \to \dtsS$ a valuation of state variables. The satisfaction relation for states and runs of $M$ with respect to \ac{HUCTLp} formulae is defined as follows:
+Let $M = \dtsTuple$ be a \ac{DTS} and $h : \var \to \dtsS$ a valuation of state variables. The satisfaction relation for states of $M$ with respect to a state \ac{HUCTLp} formulae is defined as follows:
 
 \begin{alignat*}{2}
 	(M,h,s) &\models \true	\\
@@ -119,6 +126,8 @@ Let $M = \dtsTuple$ be \ac{DTS} and $h : \var \to \dtsS$ a valuation of state va
 	(M,h,s) &\models \withTime{t}\ctlA \psi 			 && \iff \forall \pi \in \withTime{t}runs : (M,h,\pi) \models \psi \\	
 \end{alignat*}
 
+The satisfaction relation for runs of $M$ with respect to a path \ac{HUCTLp} formulae is defined as follows:
+
 \begin{alignat*}{2}
 	(M,h,\pi) &\models \dctlX{\chi} \varphi								& \iff & \pi_\dtsDir(0) \models \chi \text{ and } (M, h, \pi_\dtsS(1)) \models \varphi \\
 	(M,h,\pi) &\models \varphi_1 \dctlUl{\chi} \varphi_2		  & \iff & \exists i : \pi_\dtsS(i) \models \varphi_2 \text{ and } \\
@@ -131,62 +140,149 @@ Let $M = \dtsTuple$ be \ac{DTS} and $h : \var \to \dtsS$ a valuation of state va
 &																		 & 		 & \forall i : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(i) \models \chi \\
 \end{alignat*}
 
-Apart from these basic operators, we will use the following list of abbreviations:
+\subsection{Other operators}
+
+Apart from the basic set of operators defined by the \ac{HUCTLp} syntax, we will also use the following abbreviations to extend the logic with other common operators.
+
+First, we define directed extensions of the standard \ac{CTL} $\ctlF$ and $\ctlG$ operators:
+
 \begin{align*}
 	\dctlF{\chi} \varphi 				 & \equiv true \dctlUl{\chi} \varphi \\
 	\dctlG{\chi} \varphi 				& \equiv \varphi \dctlWl{\chi} false \\
-	\ctlX \varphi							& \equiv \dctlX{true} \varphi \\ 
-	\ctlF \varphi 							& \equiv \dctlF{true} \varphi \\
-	\ctlG \varphi 							& \equiv \dctlG{true} \varphi  \\
-	\varphi_1 \ctlU \varphi_2 		 & \equiv \varphi_1 \dctlUl{true} \varphi_2 \\
-	\varphi_1 \ctlW \varphi_2 		& \equiv \varphi_1 \dctlWl{true} \varphi_2 \\
-	\dctlXW{\chi} \varphi			  & \equiv \neg \dctlX{\chi} \neg \varphi \\
-	\dctlFW{\chi} \varphi 			   & \equiv \neg \dctlG{\chi} \neg \varphi \\
 \end{align*}
 
-Note that the standard equivalence $\ctlF \varphi \equiv \neg \ctlG \neg \varphi$ does not hold in general, therefore we introduce the weak operators. however, also note that when the notion of directions is removed ($\chi = true$), the equality holds. 
+Further discussion of these operators and their relationship with their \ac{CTL} counterparts is provided in subsection \ref{sec:weak}.
 
-\emph{Add example on how weak-strong duality works (first-order operators are flipped)}
-
-Finally, please note the following equivalences:
+Second, we define other operators commonly used in first order logic:
 
 \begin{align*}
-	\varphi_1 \dctlUlr{\chi}{\xi} \varphi_2						& \equiv \varphi_1 \dctlUl{\chi} (\varphi_1 \land \dctlX{\xi} \varphi_2)  \\
-	\varphi_2 \dctlWlr{\chi}{\xi} \varphi_2 				   & \equiv \varphi_1 \dctlWl{\chi} (\varphi_1 \land \dctlX{\xi} \varphi_2) \\
-	\ctlA[\varphi_1 \dctlWl{\chi} \varphi_2] 				  & \equiv \neg \ctlE[ \neg \varphi_2 \ctlU (\neg \varphi_2 \land (\neg \varphi_1 \lor \ctlE \dctlX{\neg\chi} true)) ] \\
-	\ctlE[\varphi_1 \dctlWl{\chi} \varphi_2] 				  & \equiv \ctlE[\varphi_1 \dctlUl{\chi} \varphi_2] \lor \neg \ctlA \dctlFW{\chi} \neg \varphi_1 \\
+	\hctlForall{x} \varphi 		   		& \equiv \neg \hctlExists{x} \neg \varphi \\
+	\hctlExists{x \in \varphi_1} \varphi_2 & \equiv \hctlExists{x} ((\hctlAt{x} \varphi_1) \land \varphi_2) \\
+	\hctlForall{x \in \varphi_1} \varphi_2  & \equiv \hctlForall{x} ((\hctlAt{x} \varphi_1) \implies \varphi_2) \\
 \end{align*}
 
-Based on these observations, we can see that all these operators can be translated to this set of temporal operators $\dctlX{\chi}, \dctlXW{\chi}, \dctlFW{\chi}, \dctlUl{\chi}$ combined with both path quantifiers $\withTime{t}\ctlE$ and $\withTime{t}\ctlA$.
+The first operator is the standard first-order universal quantifier, whereas the second and third operator are based on the standard first-order quantifiers, but they are extended with the ability to restrict the space of the variable $x$ to a validity region of a specific formula. Such modification can be very useful when optimizing the execution time of the formula, since validity for a significant amount of states can be decided without actually considering formula $\varphi_2$.
+
+\subsection{Relationship with \ac{CTL}}
+
+Since \ac{HUCTLp} is an extension of \ac{CTL}, its operators can be used to define the standard \ac{CTL}. To do so, we can use the following equivalences:
+
+ \begin{align*}
+ \ctlE\ctlX \varphi							& \equiv \future\ctlE\dctlX{true} \varphi &
+ \ctlA\ctlX \varphi							& \equiv \future\ctlA\dctlX{true} \varphi \\ 
+ \ctlE\ctlF \varphi							& \equiv \future\ctlE\dctlF{true} \varphi &
+ \ctlA\ctlF \varphi							& \equiv \future\ctlA\dctlF{true} \varphi \\ 
+ \ctlE\ctlG \varphi							& \equiv \future\ctlE\dctlG{true} \varphi &
+ \ctlA\ctlG \varphi							& \equiv \future\ctlA\dctlG{true} \varphi \\ 
+ \ctlE[\varphi_1 \ctlU \varphi_2] 	 & \equiv \future\ctlE[\varphi_1 \dctlUl{true} \varphi_2] &
+ \ctlA[\varphi_1 \ctlU \varphi_2] 	 & \equiv \future\ctlA[\varphi_1 \dctlUl{true} \varphi_2] \\
+ \ctlE[\varphi_1 \ctlW \varphi_2] 	 & \equiv \future\ctlE[\varphi_1 \dctlWl{true} \varphi_2] &
+ \ctlA[\varphi_1 \ctlW \varphi_2] 	 & \equiv \future\ctlA[\varphi_1 \dctlWl{true} \varphi_2] \\
+ \end{align*}
+ 
+As one can easily observe, by using $true$ as a direction formula, the direction restrictions imposed by \ac{HUCTLp} can be easily ignored and the pure \ac{CTL} operators are obtained. For a further discussion on the effects of direction restrictions on the \ac{CTL} semantics, please see section \ref{sec:weak}.
+
+\subsection{Weak operators}
+\label{sec:weak}
+
+When understanding \ac{HUCTLp} formulas, one has to keep in mind one important distinction between classic \ac{CTL} and \ac{HUCTLp}. In \ac{CTL}, the following equivalences hold universally:
+
+\begin{align*}
+	\neg \ctlA\ctlX \neg \varphi 			& \equiv \ctlE\ctlX \varphi &
+	\neg \ctlA\ctlG \neg \varphi 			& \equiv \ctlE\ctlF \varphi \\
+	\neg \ctlE\ctlX \neg \varphi 			& \equiv \ctlA\ctlX \varphi &
+	\neg \ctlE\ctlG \neg \varphi 			& \equiv \ctlA\ctlF \varphi \\
+\end{align*}
+
+However, in \ac{HUCTLp}, these equivalences are only valid when the direction restriction on the operators are $true$, which reduces them to their classic \ac{CTL} counterparts.
+
+To understand why these equivalences do not hold, let us explore in detail the case of $\ctlA\ctlX$ and $\ctlE\ctlX$:
+
+\begin{align*}
+		(M, h, s) \models & \neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi	\\	
+			& \iff  \neg [ \forall \pi \in \withTime{t}runs  : \pi_\dtsDir(0) \models \chi \land (M, h, \pi_\dtsS(1)) \models \neg \varphi ] \\
+			& \iff  \exists \pi \in \withTime{t}runs  : \pi_\dtsDir(0) \not\models \chi \lor (M, h, \pi_\dtsS(1)) \not\models \neg \varphi \\ 
+			& \iff  \exists \pi \in \withTime{t}runs  : \pi_\dtsDir(0) \models \chi \implies (M, h, \pi_\dtsS(1)) \models \varphi \\
+		(M, h, s) \models & \withTime{t}\ctlE\dctlX{\chi} \varphi \\		
+			& \iff \exists \pi \in \withTime{t}runs  : \pi_\dtsDir(0) \models \chi \land (M, h, \pi_\dtsS(1)) \models \varphi \\
+\end{align*}
+
+First, let us observe that if $\chi = true$, both definitions are obviously equivalent. However, as we can see, the original $\withTime{t}\ctlE\dctlX{\chi}$ operator intuitively states that there \emph{exists a $t$-run where first direction models $\chi$ and the next state models $\varphi$}, hence there really must exists such run. On the other hand, the expression $\neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi$ translates to a slightly different statement. Intuitively, $\neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi$ states that there \emph{exists a $t$-run where if the first direction models $\chi$, the next state models $\varphi$}. Therefore this formula is satisfied not only when $\withTime{t}\ctlE\dctlX{\chi}$ is satisfied, but also when there is a run which does not start with a direction satisfying $\chi$.
+
+Similarly, in case of $\neg \withTime{t}\ctlE\dctlX{\chi} \neg \varphi$, we get an intuitive meaning \emph{if the first direction of a $t$-run models $\chi$, the next state models $\varphi$}. Compare this to the meaning of $\withTime{t}\ctlA\dctlX{\chi}$, which states that \emph{the first direction of each $t$-run models $\chi$ and the next state models $\varphi$}.
+
+As we can see, not only are the semantics of these expressions different, but both semantics can be potentially useful. To leverage this fact, we define a new set of operators:
+
+\begin{align*}
+	\withTime{t}\ctlE\dctlFW{\chi} \varphi & \equiv \neg \withTime{t}\ctlA\dctlG{\chi} \neg \varphi &
+	\withTime{t}\ctlE\dctlXW{\chi} \varphi & \equiv \neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi \\	
+	\withTime{t}\ctlA\dctlFW{\chi} \varphi & \equiv \neg \withTime{t}\ctlE\dctlG{\chi} \neg \varphi &
+	\withTime{t}\ctlA\dctlXW{\chi} \varphi & \equiv \neg \withTime{t}\ctlE\dctlX{\chi} \neg \varphi \\
+\end{align*}
+
+We call these operators \emph{weak}, because in the definition of each of these operators, the original strict direction requirement is replaced with a less restrictive implication. Indeed, similar to the $\dctlX{\chi}$ example, when understanding strict and weak $\dctlF{\chi}$ operator variants, one can follow these intuitive definitions:
+
+\begin{itemize}
+	\item $\withTime{t}\ctlE\dctlF{\chi} \varphi$ - \emph{exists a $t$-run such that at some point, $\varphi$ is satisfied and prior to this point $\chi$ always holds};
+	\item $\withTime{t}\ctlE\dctlFW{\chi} \varphi$ - \emph{exists a $t$-run such that at some point, $\chi$ is not satisfied or $\varphi$ is satisfied (and prior to this point, $\chi$ always holds)};
+	\item $\withTime{t}\ctlA\dctlF{\chi} \varphi$ - \emph{all $t$-runs contain a point where $\varphi$ is satisfied and prior to this point, $\chi$ always holds};
+	\item $\withTime{t}\ctlA\dctlFW{\chi} \varphi$ - \emph{all $t$-runs contain a point where $\chi$ is not satisfied or $\varphi$ is satisfied (and prior to this point, $\chi$ always holds)};
+\end{itemize}
+
+When using the weak operators, one has to keep in mind that even though the transition relation of each \ac{DTS} is both total and past-total, it is not necessarily total or past-total with respect to a specific direction formula $\chi$. Hence not only can one encounter runs that satisfy a weak formula due to a transition with does not satisfy $\chi$, one can even encounter complete \emph{direction deadlocks} - that is states which have no transition satisfying given $\chi$. In such states, all universal weak formulae are automatically satisfied. This fact on itself is not necessarily a disadvantage, however, one has to consider it when interpreting weak formulas.
+
+\subsection{Other useful equivalences}
+
+In this final subsection, we define a list of other useful equivalences that allow us to reduce the minimal set of operators needed to describe any \ac{HUCTLp} formula:
+
+\begin{align*}
+	\withTime{t} \ctlE[\varphi_1 \dctlUlr{\chi}{\xi} \varphi_2]						& \equiv \withTime{t} \ctlE[\varphi_1 \dctlUl{\chi} (\varphi_1 \land \withTime{t}\ctlE\dctlX{\xi} \varphi_2)] \\
+	\withTime{t} \ctlA[\varphi_1 \dctlUlr{\chi}{\xi} \varphi_2]						& \equiv \withTime{t} \ctlA[\varphi_1 \dctlUl{\chi} (\varphi_1 \land \withTime{t}\ctlA\dctlX{\xi} \varphi_2)] \\
+	\withTime{t} \ctlE[\varphi_1 \dctlWlr{\chi}{\xi} \varphi_2]						& \equiv \withTime{t} \ctlE[\varphi_1 \dctlWl{\chi} (\varphi_1 \land \withTime{t}\ctlE\dctlX{\xi} \varphi_2)] \\
+	\withTime{t} \ctlA[\varphi_1 \dctlWlr{\chi}{\xi} \varphi_2]						& \equiv \withTime{t} \ctlA[\varphi_1 \dctlWl{\chi} (\varphi_1 \land \withTime{t}\ctlA\dctlX{\xi} \varphi_2)] \\
+	\withTime{t}\ctlA[\varphi_1 \dctlWl{\chi} \varphi_2] 				  & \equiv \neg \withTime{t}\ctlE[ \neg \varphi_2 \ctlU (\neg \varphi_2 \land (\neg \varphi_1 \lor \withTime{t}\ctlE \dctlX{\neg\chi} true)) ] \\
+	\withTime{t}\ctlE[\varphi_1 \dctlWl{\chi} \varphi_2] 				  & \equiv \withTime{t}\ctlE[\varphi_1 \dctlUl{\chi} \varphi_2] \lor \neg \withTime{t}\ctlA \dctlFW{\chi} \neg \varphi_1 \\
+\end{align*}
+
+Based on these and previous observations in this section, we can see that one of the minimal operator sets needed to describe all \ac{HUCTLp} formulae is:
+
+\begin{align*}
+	\withTime{t}\ctlE\dctlX{\chi} \varphi, \withTime{t}\ctlE\dctlFW{\chi} \varphi, \withTime{t}\ctlE\dctlUl{\chi} \varphi, \\
+	\withTime{t}\ctlA\dctlX{\chi} \varphi, \withTime{t}\ctlA\dctlFW{\chi} \varphi, \withTime{t}\ctlA\dctlUl{\chi} \varphi, \\
+	\hctlAt{x} \varphi, \hctlBind{x} \varphi, \hctlExists{x} \varphi
+\end{align*}
+
+(This is naturally not the only minimal operator set, however, it is the one we will consider from now on in this work)
 
 \section{\Acl{PDTS}}
 
-We extend the definition of \ac{DTS} with the notion of parameters. A \ac{PDTS} is essentially a family of \acp{DTS} that share the same state space, but differ in terms of transition relations.
+In order to reason about systems with parameters, we extend the definition of \ac{DTS} with the notion of parameters. A \ac{PDTS} is essentially a family of \acp{DTS} that share the same state space, but differ in terms of transition relations. 
 
-Let \acl{PDTS} be a tuple $\mathcal{K} = \pdtsTuple$  where $\pdtsP$ is a finite set of parameter valuations and $\pdtsT = \{ \dtsT_p \mid p \in \pdtsP : \dtsT_p \subseteq \dtsS \times \dtsDir \times \dtsS \}$. We then write $\mathcal{K}_p$ to denote a \ac{DTS} such that $\mathcal{K}_p = (\dtsS, \dtsDir, \dtsT_p, \dtsAP, \dtsL)$.
+\subsection{Definition}
 
-Furthermore, we define a \emph{joint transition relation} $TP \subseteq \dtsS \times \dtsDir \times \dtsS \times 2^{\pdtsP}$ as $TP = \{ (s, d, s', P) \mid P \subseteq \pdtsP \text{ is the largest set s. t. } \forall p \in P : (s, d, s') \in \dtsT_p \}$.
+Let \acl{PDTS} be a tuple $\mathcal{K} = \pdtsTuple$  where $\pdtsP$ is a finite set of parameter valuations and $\pdtsT$ is a parametrised transition relation $\pdtsT \subseteq \dtsS \times \dtsDir \times \pdtsP \times \dtsS$. We use the notation $\pdtsT_p$ to denote the parametrised transition relation restricted to a specific parameter valuation $p$, i.e. $\pdtsT_p = \{ (s, d, p', s') \in \pdtsT \mid p' = p \}$.  We then write $\mathcal{K}_p$ to denote a specific parametrisation of the original $\mathcal{K}$—a \ac{DTS} such that $\mathcal{K}_p = (\dtsS, \dtsDir, \dtsT_p, \dtsAP, \dtsL)$. 
+
+We will write $\tP{s}{t}$ to denote the set of all parameter valuations for which the transition from $s$ to $t$ is allowed: $\tP{s}{t} = \{ p \in \pdtsP \mid \exists d \in \dtsDir : (s, d, p, t) \in \pdtsT \}$. The notion of time flows also naturally extends to \acp{PDTS} with $\future\pdtsT = \pdtsT$ and $\past\pdtsT = \{ (s, d, p, s') \mid (s', d, p, s) \in \pdtsT \}$.
+
+\subsection{Parameter representation}
+
+In this work, we assume that the parameters of the \ac{PDTS} are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $\tP{s}{t} = \{ p \in \pdtsP \mid p \models \Phi \}$. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will also use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} formulae.
+
+We assume the following expressions can be used to reason about the parameter formulae describing a specific \ac{PDTS}:
 
 \begin{itemize}
-	\item The notion of time-flows naturally extends also to \acp{PDTS} and to the joint transition relation.
-	\item The notion of runs applies only to the underlying $\mathcal{K}_p$
-	\item $\withTime{t}\Pi_\mathcal{K} = \bigcup_{p \in \pdtsP} \withTime{t}\Pi_{\mathcal{K}_p}$
-	\item $\withTime{t}runs_\mathcal{K}(s) = \{ \pi \in \withTime{t}\Pi_\mathcal{K} \mid \pi_\dtsS(0) = s \}$
-	\item $\withTime{t}succ_\mathcal{K}(s) = \{ (s', d, P) \in \dtsS \times \dtsDir \times 2^\pdtsP \mid (s, d, s', P) \in TP \}$
-	\item $\withTime{t}pred_\mathcal{K}(s) = \withTime{\neg t}succ_\mathcal{K}(s)$
+	\item $\withTime{t}transition(s,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT$; that is a set of all parameters for which the transition is available regardless of the direction (preserving given time flow).
+	\item $\withTime{t}direction(s, \chi ,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT \land d \models \chi$; which represents all parameters for which the transition is enabled and the given direction constraint is satisfied.
 \end{itemize}
 
-Similar to \ac{DTS}, we write $s \pdtsTransition{d}{p} s'$ when $(s, d, s') \in \dtsT_p$. 
 
 \section{Parameter Synthesis}
 
-The parameter synthesis problem for \ac{PDTS} $\mathcal{K} : \dtsS \to 2^\pdtsP$ and \ac{HUCTLp} formula $\varphi$ is to compute function $\mathcal{F}^\mathcal{K}_\varphi$ such that $\mathcal{F}^\mathcal{K}_\varphi(s) = \{p \in \pdtsP \mid (\mathcal{K}_p, s) \models \varphi\}$.
+The parameter synthesis problem for a \ac{PDTS} $\mathcal{K}$, an initial parameter constraint $\Phi_I$ and a \ac{HUCTLp} formula $\varphi$ is to compute a function $\mathcal{F}$ such that $\mathcal{F}(s) = \{p \in \pdtsP \mid (\mathcal{K}_p, h_0, s) \models \varphi \land p \models \Phi_I \}$.
 
-Discrete bifurcation analysis is ...
+\section{Partitioning and \ac{PDTS} fragments}
 
-\section{Partitioning of a \ac{PDTS}}
-
-In order to distribute the \ac{PDTS} to several independent workers, we define the notion of \emph{partitions}. Any \ac{PDTS} can be divided into $N$ partitions using a injective partition function $f: \dtsS \to \{1, \ldots, N \}$. Intuitively, the partition function divides the state space of a \ac{PDTS} into $N$ disjoint groups (some of which may be empty) which we then call partitions. Such partitions can then be distributed to several independent agents to reduce the amount of resources required by a singular agent. However, this also usually introduces a communication overhead. 
+In order to distribute the \ac{PDTS} to several independent workers, we define the notion of \emph{fragments}. Any \ac{PDTS} can be divided into $N$ fragments using an injective partition function $f: \dtsS \to \{1, \ldots, N \}$. Intuitively, the partition function divides the state space of a \ac{PDTS} into $N$ disjoint groups (some of which may be empty) which we then call fragments. Such partitions can be then distributed to several independent agents to reduce the amount of resources required by a singular agent. However, this also usually introduces a communication overhead. 
 
 We say that an agent $i$ \emph{owns} a state $s$ when the state is part of the agents partition, that is $f(s) = i$. We also call these states \emph{local}. All states that are not owned by the agent $i$ are then referred to as \emph{remote}.
 
