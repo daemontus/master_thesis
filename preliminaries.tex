@@ -232,6 +232,7 @@ We call these operators \emph{weak}, because in the definition of each of these 
 When using the weak operators, one has to keep in mind that even though the transition relation of each \ac{DTS} is both total and past-total, it is not necessarily total or past-total with respect to a specific direction formula $\chi$. Hence not only can one encounter runs that satisfy a weak formula due to a transition with does not satisfy $\chi$, one can even encounter complete \emph{direction deadlocks} - that is states which have no transition satisfying given $\chi$. In such states, all universal weak formulae are automatically satisfied. This fact on itself is not necessarily a disadvantage, however, one has to consider it when interpreting weak formulas.
 
 \subsection{Other useful equivalences}
+\label{sec:huctlEnd}
 
 In this final subsection, we define a list of other useful equivalences that allow us to reduce the minimal set of operators needed to describe any \ac{HUCTLp} formula:
 
@@ -267,14 +268,15 @@ We will write $\tP{s}{t}$ to denote the set of all parameter valuations for whic
 TODO: define transitions with d,p, with d, and without anything
 
 \subsection{Parameter representation}
+\label{sec:paramRepresentation}
 
 In this work, we assume that the parameters of the \ac{PDTS} are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $\tP{s}{t} = \{ p \in \pdtsP \mid p \models \Phi \}$. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will also use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} formulae.
 
 We assume the following expressions can be used to reason about the parameter formulae describing a specific \ac{PDTS}:
 
 \begin{itemize}
-	\item $\withTime{t}transition(s,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT$; that is a set of all parameters for which the transition is available regardless of the direction (preserving given time flow).
-	\item $\withTime{t}direction(s, \chi ,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT \land d \models \chi$; which represents all parameters for which the transition is enabled and the given direction constraint is satisfied.
+	\item $\withTime{t}trans(s,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT$; that is a set of all parameters for which the transition is available regardless of the direction (preserving given time flow).
+	\item $\withTime{t}dir(s, \chi ,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT \land d \models \chi$; which represents all parameters for which the transition is enabled and the given direction constraint is satisfied.
 \end{itemize}
 
 
@@ -299,6 +301,6 @@ In this section, we also define two key properties of a partition function that 
 	\item \emph{Number of cross transitions}. A cross transition is a transition that leads between two states in different fragments of the system. Such transition is usually a source of communication overhead, since any related operation usually involves both fragments. Hence the amount of cross transitions directly influences the overall communication overhead. Also observe that this number is very closely related to the size of the $\dtsSborder_i$ sets, since the states at each end of the cross transitions will be considered as border states in one of the fragments.
 \end{itemize}
 
-As we can see, in order to achieve good performance, the partition function needs to satisfy both of these properties. However, this can't be easily achieved for all systems. Without any prior knowledge of the system, one could design a partition function that would be close to uniformity, but that might also introduce a significant amount of cross transitions. Similarly, if one were to focus on optimizing the amount of cross transition, the resulting partitioning might not be uniform enough to be able to distribute to agents with limited resources.
+As we can see, in order to achieve good performance, the partition function needs to satisfy both of these properties. However, this can't be easily achieved for all systems. Without any prior knowledge of the system, one could design a partition function that would be close to uniformity, but that might also introduce a significant amount of cross transitions. Similarly, if one were to focus on optimizing the amount of cross transitions, the resulting partitioning might not be uniform enough to be able to distribute to agents with limited resources.
 
 Later in this work, we are going to describe how to exploit specific properties of biological models to design partitioning that is both uniform and which ensures on average a small amount of cross transitions.

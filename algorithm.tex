@@ -2,18 +2,107 @@ In this section, we describe the algorithm used for the parameter synthesis comp
 
 \section{Environment and data structures}
 
-The algorithm presented in this work assumes a distributed environment of $N$ independent, reliable agents connected using reliable communication channels. In practice, such model is suitable to model multi core machines and small to medium computational clusters where fault tolerance is not strictly necessary. In the end of this chapter we will shortly explore the possibilities of extending the algorithm to include basic fault tolerance capabilities. 
+The algorithm presented in this work assumes a distributed environment of $N$ independent, reliable agents connected using reliable communication channels. In practice, such model is suitable to model multi core machines and small to medium computational clusters where fault tolerance is not strictly necessary. In the end of this chapter, we will shortly explore the possibilities of adapting the algorithm to possible agent failure. 
 
-We assume that each agent has access to the following data structures:
+We assume that each agent has locally access to the following data structures:
 
 \begin{itemize}
 	\item Total number of communicating agents $N$;
 	\item A unique agent identifier $id \in \{ 1, \ldots, N \}$;
-	\item A \ac{PDTS} $\mathcal{K} = \pdtsTuple$;
-	\item A \ac{HUCTLp} formula $\varphi$;
 	\item A partition function $f : \dtsS \to \{1, \ldots, N \}$
-	\item For each sub-formula $\psi \in cl(\varphi)$ an assumption assignment $\mathcal{F}_\psi : \dtsS \to 2^\pdtsP$;
+	\item A \ac{PDTS} fragment $\mathcal{K}_i$;
+	\item A \ac{HUCTLp} formula $\varphi$;
+	\item An initial parameter constrain $\Phi_I$;
 \end{itemize}
+
+Note that not all of these structures have to be represented explicitly. For example, the \ac{PDTS} fragment and the partition function is usually computed on-the-fly.
+
+\section{Assumption semantics}
+
+In order to represent the intermediate results during a computation and accommodate for the distributed nature of the \ac{PDTS} fragments, we introduce the notion of assumptions and related assumption semantics of the \ac{HUCTLp} formulae.
+
+\subsection{Definition}
+
+We define a positive assumption function $\assumeT_i(\psi, h, s) = \Phi$ and a negative assumption function $\assumeF_i(\psi, h, s) = \Phi$ where $\psi \in cl(\varphi)$ is a sub-formula of the property $\varphi$, $h: Var \to \dtsS$ is a valuation of state variables, $s \in \dtsS$ is a state (not necessarily local) and $\Phi$ is a parameter constrain. When the fragment is clear from context, we can omit the subscript $i$.
+
+We intuitively say that for the positive assumption function $\assumeT$, $\psi$ is assumed to hold in state $s$ for valuation $h$ and parameters $\{p \in \pdtsP \mid p \models \Phi \}$ and analogically for the negative assumption function $\psi$ is expected not to hold. Based on this interpretation, we also assume that for a valid pair of assumption functions, parameter constrain $\assumeT(\psi, s, h) \land \assumeF(\psi, s, h)$ can never be satisfied - i.e. $\psi$ cannot be assumed to be valid and invalid at the same time.
+
+Also observe that the formula $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. As we will see later, this can happen either due to circular dependency between assumptions or due to missing information from other \ac{PDTS} fragments.
+
+
+Initially, all assumptions start as $\ffalse$ - hence the set of valid and invalid parameter valuations is empty and the set of unknown parameter valuations is the whole universe.
+
+Finally, note that due to the presence of the unknown parameter valuations, these intuitive equalities do not always hold:
+
+\begin{align*}
+	\assumeT(\psi, s, h) & \not= \neg \assumeF(\psi, s, h) \\
+	\assumeT(\psi, s, h) & \not= \neg \assumeT(\neg \psi, s, h)
+\end{align*}
+
+In the first case, the expression $\neg \assumeF(\psi, s, h)$ represents not only parameters for which $\psi$ is satisfied, but also parameters for which the result is unknown. Similarly, in the second case, $\neg \assumeT(\neg \psi, s, h)$ denotes not only parameters for which the $\neg \psi$ is not satisfied (hence $\psi$ is satisfied) but also unknown parameter valuations. This is due to the fact that the negation in these equivalences is used to compare different context: assumptions, parameter formulae and \ac{HUCTLp} formulae. However, as long as the set of unknown parameter valuations is empty, these equivalences are valid.
+
+\subsection{Semantics}
+
+With the general caveats of the assumption functions described, we are ready to give a recursive definition of assumption function for a \ac{HUCTLp} formula over a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$. In this definition, we do not use the full operator set of \ac{HUCTLp}, but rather the simplified set of operators defined in section \ref{sec:huctlEnd}. The definition is divided into two parts.
+
+First part describes the initial assumptions of the system. Here, $p \in \dtsAP$ is an atomic proposition and $x \in Var$ is a state variable.
+
+\begin{align*}
+	\assumeT(true, s, h) & = \Phi_I \\
+	\assumeF(true, s, h) & = \neg \Phi_I \\
+	\assumeT(p, s, h) & = 
+	\begin{cases}
+		\Phi_I & p \in \dtsL(s) \\
+		\ffalse & \texttt{otherwise} \\
+	\end{cases}
+	\\
+	\assumeF(p, s, h) & = \neg \assumeT(p, s, h) \\
+	\assumeT(x, s, h[ x \mapsto s' ]) & = 
+	\begin{cases}
+		\Phi_I & s = s' \\
+		\ffalse & \texttt{otherwise}
+	\end{cases}
+	\\
+	\assumeF(x, s, h[ x \mapsto s']) & = \neg \assumeT(x, s, h[ x \mapsto s' ]) \\
+\end{align*}
+
+Please observe that in all cases, no unknown parameters are present. This naturally follows from the fact that the validity of the atomic formulae depends solely on the properties of the system and the variable valuation, and hence can be resolved unambiguously.
+
+In the second part, we provide the semantics for the temporal operators.
+
+\begin{align*}
+	\assumeT(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h)  = & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT(\varphi, s', h)] \\
+	\assumeF(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h)  = & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\varphi, s', h)] \\
+	%
+	\assumeT(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h) = & \bigwedge_{s' \in \dtsS} \neg \withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT(\varphi, s', h)] \\
+	\assumeF(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h)  = & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [ \withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\varphi, s', h)] \\
+	%
+	\assumeT(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  = &\ \assumeT(\varphi, s, h) \lor \\
+	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
+	 \assumeF(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  = &\ \assumeF(\varphi, s, h) \land \\
+	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeF(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
+	 %
+	 \assumeT(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  = &\ \assumeT(\varphi, s, h) \lor \\
+	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
+	 \assumeF(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  = &\ \assumeF(\varphi, s, h) \land \\
+	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeF(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
+	 %
+	\assumeT(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeT(\varphi_2, s, h) \lor \big[ \assumeT(\varphi_1, s, h) \land \\
+	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	\assumeF(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeF(\varphi_2, s, h) \land \big[ \assumeF(\varphi_1, s, h) \lor \\
+	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	%
+	\assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeT(\varphi_2, s, h) \lor \big[ \assumeT(\varphi_1, s, h) \land \\
+	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	\assumeF(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeF(\varphi_2, s, h) \land \big[ \assumeF(\varphi_1, s, h) \lor \\
+	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+\end{align*}
+
+As we can see, the differences between operators and their positive/negative semantics are often very small, but crucial.
+
+First of all, let us observe that due to the negation inequality, we can't simply handle the negative assumptions as negations of the positive ones. Second, we see that the observations about the nature of weak operators made in the section \ref{sec:weak} are still valid—that is, one can clearly observe the strict ($\land$) and weak($\Rightarrow$) direction requirement in all definitions.
+
+\subsection{Correctness}
 
 \section{Algorithm outline}
 
