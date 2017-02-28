@@ -23,14 +23,14 @@ In order to represent the intermediate results during a computation and accommod
 
 \subsection{Definition}
 
-We define a positive assumption function $\assumeT_i(\psi, h, s) = \Phi$ and a negative assumption function $\assumeF_i(\psi, h, s) = \Phi$ where $\psi \in cl(\varphi)$ is a sub-formula of the property $\varphi$, $h: Var \to \dtsS$ is a valuation of state variables, $s \in \dtsS$ is a state (not necessarily local) and $\Phi$ is a parameter constrain. When the fragment is clear from context, we can omit the subscript $i$.
+We define a positive assumption function $\assumeT_i(\psi, h, s) = \Phi$ and a negative assumption function $\assumeF_i(\psi, h, s) = \Phi$ where $\psi \in cl(\varphi)$ is a sub-formula of the property $\varphi$, $h: Var \to \dtsS$ is a valuation of state variables, $s \in \dtsS$ is a state (not necessarily local or border) and $\Phi$ is a parameter constrain. When the fragment is clear from context, we can omit the subscript $i$.
 
 We intuitively say that for the positive assumption function $\assumeT$, $\psi$ is assumed to hold in state $s$ for valuation $h$ and parameters $\{p \in \pdtsP \mid p \models \Phi \}$ and analogically for the negative assumption function $\psi$ is expected not to hold. Based on this interpretation, we also assume that for a valid pair of assumption functions, parameter constrain $\assumeT(\psi, s, h) \land \assumeF(\psi, s, h)$ can never be satisfied - i.e. $\psi$ cannot be assumed to be valid and invalid at the same time.
 
 Also observe that the formula $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. As we will see later, this can happen either due to circular dependency between assumptions or due to missing information from other \ac{PDTS} fragments.
 
 
-Initially, all assumptions start as $\ffalse$ - hence the set of valid and invalid parameter valuations is empty and the set of unknown parameter valuations is the whole universe.
+Initially, all assumptions start as $\ffalse$, hence the set of valid and invalid parameter valuations is empty and the set of unknown parameter valuations is the whole universe.
 
 Finally, note that due to the presence of the unknown parameter valuations, these intuitive equalities do not always hold:
 
@@ -43,7 +43,7 @@ In the first case, the expression $\neg \assumeF(\psi, s, h)$ represents not onl
 
 \subsection{Semantics}
 
-With the general caveats of the assumption functions described, we are ready to give a recursive definition of assumption function for a \ac{HUCTLp} formula over a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$. In this definition, we do not use the full operator set of \ac{HUCTLp}, but rather the simplified set of operators defined in section \ref{sec:huctlEnd}. The definition is divided into two parts.
+With the general caveats of the assumption functions described, we are ready to give a recursive definition of an assumption function for a \ac{HUCTLp} formula over a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$. In this definition, we do not use the full operator set of \ac{HUCTLp}, but rather the simplified set of operators defined in section \ref{sec:huctlEnd}. The definition is divided into several parts.
 
 First part describes the initial assumptions of the system. Here, $p \in \dtsAP$ is an atomic proposition and $x \in Var$ is a state variable.
 
@@ -98,11 +98,32 @@ In the second part, we provide the semantics for the temporal operators.
 	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
 \end{align*}
 
-As we can see, the differences between operators and their positive/negative semantics are often very small, but crucial.
+As we can see, the differences between operators and their positive and negative semantics are often very subtle, but crucial.
 
 First of all, let us observe that due to the negation inequality, we can't simply handle the negative assumptions as negations of the positive ones. Second, we see that the observations about the nature of weak operators made in the section \ref{sec:weak} are still valid—that is, one can clearly observe the strict ($\land$) and weak($\Rightarrow$) direction requirement in all definitions.
 
-\subsection{Correctness}
+Finally, let us describe the semantics of the remaining hybrid operators:
+
+\begin{align*}
+	\assumeT(\hctlBind{x} \varphi, s, h) = &\ \assumeT(\varphi, s, h[x \mapsto s]) \\
+	\assumeF(\hctlBind{x} \varphi, s, h) = &\ \assumeF(\varphi, s, h[x \mapsto s]) \\
+	\assumeT(\hctlExists{x} \varphi, s, h) = &\ \bigvee_{s' \in S} \assumeT(\varphi, s, h[x \mapsto s']) \\
+	\assumeF(\hctlExists{x} \varphi, s, h) = &\ \bigwedge_{s' \in S} \assumeF(\varphi, s, h[x \mapsto s']) \\
+	\assumeT(\hctlAt{x} \varphi, s, h[x \mapsto s']) = &\ \assumeT(\varphi, s', h[x \mapsto s']) \\
+	\assumeF(\hctlAt{x} \varphi, s, h[x \mapsto s']) = &\ \assumeF(\varphi, s', h[x \mapsto s']) \\
+\end{align*}
+
+\subsection{Assumption validity}
+
+We say that the assumption about the \ac{PDTS} $\mathcal{K}$ is \emph{valid} when $\forall p \in \pdtsP : p \models \assumeT(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \models \varphi$ and $ p \models \assumeF(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \not\models \varphi$. That is, an assumption implies validity, but validity does not imply assumption.
+
+We assume that the validity of the atomic proposition assumptions and hybrid operator assumptions is obvious, since they can be almost directly translated to the original definitions. However, the validity of the temporal assumptions might not be entirely clear, since the original definition uses infinite runs, while the assumptions are defined recursively using the \ac{PDTS} transitions.
+
+In order to mitigate this uncertainty, we show a full validity proof for the $\withTime{t}\ctlA\dctlUl{\chi}$ operator—one of the most complex temporal operators. Proofs for other operators are extremely similar.
+
+
+
+
 
 \section{Algorithm outline}
 
