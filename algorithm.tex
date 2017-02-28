@@ -102,9 +102,13 @@ As we can see, the differences between operators and their positive and negative
 
 First of all, let us observe that due to the negation inequality, we can't simply handle the negative assumptions as negations of the positive ones. Second, we see that the observations about the nature of weak operators made in the section \ref{sec:weak} are still valid—that is, one can clearly observe the strict ($\land$) and weak($\Rightarrow$) direction requirement in all definitions.
 
-Finally, let us describe the semantics of the remaining hybrid operators:
+Finally, let us describe the semantics of the remaining boolean and hybrid operators:
 
 \begin{align*}
+	\assumeT(\neg \varphi, s, h) = & \assumeF(\varphi, s, h) \\
+	\assumeF(\neg \varphi, s, h) = & \assumeT(\varphi, s, h) \\
+	\assumeT(\varphi_1 \land \varphi_2, s, h) = & \assumeT(\varphi_1, s, h) \land \assumeT(\varphi_2, s, h) \\
+	\assumeF(\varphi_1 \land \varphi_2, s, h) = & \assumeF(\varphi_1, s, h) \lor \assumeF(\varphi_2, s, h) \\
 	\assumeT(\hctlBind{x} \varphi, s, h) = &\ \assumeT(\varphi, s, h[x \mapsto s]) \\
 	\assumeF(\hctlBind{x} \varphi, s, h) = &\ \assumeF(\varphi, s, h[x \mapsto s]) \\
 	\assumeT(\hctlExists{x} \varphi, s, h) = &\ \bigvee_{s' \in S} \assumeT(\varphi, s, h[x \mapsto s']) \\
@@ -113,57 +117,72 @@ Finally, let us describe the semantics of the remaining hybrid operators:
 	\assumeF(\hctlAt{x} \varphi, s, h[x \mapsto s']) = &\ \assumeF(\varphi, s', h[x \mapsto s']) \\
 \end{align*}
 
+If we assume an ordering on the parameter formulae based on the size of the set of parameter valuations which satisfy it, we can clearly see that all assumption functions are monotonic, therefore according to XXX theorem, there exists a maximum fix-point assumption that can't be increased any further. (TODO: They are NOT monotonic is we don't start at ff, define operator $\gets$ which will fix this)
+
 \subsection{Assumption validity}
 
-We say that the assumption about the \ac{PDTS} $\mathcal{K}$ is \emph{valid} when $\forall p \in \pdtsP : p \models \assumeT(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \models \varphi$ and $ p \models \assumeF(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \not\models \varphi$. That is, an assumption implies validity, but validity does not imply assumption.
+We say that the assumption about the \ac{PDTS} $\mathcal{K}$ is \emph{valid} when $\forall p \in \pdtsP : p \models \assumeT(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \models \varphi$ and $ p \models \assumeF(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \not\models \varphi$. That is, an assumption implies satisfaction, but satisfaction does not imply assumption.
 
-We assume that the validity of the atomic proposition assumptions and hybrid operator assumptions is obvious, since they can be almost directly translated to the original definitions. However, the validity of the temporal assumptions might not be entirely clear, since the original definition uses infinite runs, while the assumptions are defined recursively using the \ac{PDTS} transitions.
+We consider the validity of the atomic proposition assumptions and hybrid operator assumptions as obvious, since they can be almost directly translated to the original definitions. However, the validity of the temporal assumptions might not be entirely clear, since the original definition uses infinite runs, while the assumptions are defined recursively using the \ac{PDTS} transitions.
 
-In order to mitigate this uncertainty, we show a full validity proof for the $\withTime{t}\ctlA\dctlUl{\chi}$ operator—one of the most complex temporal operators. Proofs for other operators are extremely similar.
+In order to mitigate this uncertainty, we show a full validity proof for the positive assumption of the $\withTime{t}\ctlA\dctlUl{\chi}$ operator—one of the most complex temporal operators. Proofs for other operators (and negative assumptions) are very similar.
 
+\begin{itemize}
+	\item Assume all current $\assumeT$ and $\assumeF$ are valid and we are considering $ \psi = \withTime{t} \ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2 ]$.
+	\item For a contradiction, let us assume there exists a parameter valuation $p \in \pdtsP$ such that $p \models \assumeT(\psi, s, h)$ and $(\mathcal{K}_p, s, h) \not\models \psi$ for some $s$ and $h$.
+	\item Then we have to consider two cases:
+	\begin{itemize}
+		\item $p \models \assumeT(\varphi_2, s, h)$ - this is in direct contradiction with the operator definition, since for all runs $\pi$ there exists $i = 0$ such that $(\mathcal{K}_p, \pi_\dtsS(i), h) \models \varphi_2$ because $\pi_\dtsS(0) = s$ (the direction requirement is trivially satisfied because there is not $j$ smaller than $0$).
+		\item $p \models \big[ \assumeT(\varphi_1, s, h) \land \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big]$. This means that not only $(\mathcal{K}_p, s, h) \models \varphi_1$, but also for all $s'$ either the the transition from $s$ is not present, or it is present, it satisfies the direction requirement, and $p \models \assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)$. Thanks to this, we see that every infinite run starting in $s$ has to use one of these transitions. Therefore either the assumption $\assumeT(\varphi_1, s, h)$ or some of the assumptions $\assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)$ are not correct.
+	\end{itemize}
+\end{itemize}
 
+\section{Main algorithm}
 
-
-
-\section{Algorithm outline}
-
-The algorithm is divided into two parts: The main execution loop and the operator logic. Each operator is responsible for propagating 
-
-In this section, we describe the main execution loop while the following sections are devoted to the specific operators.
+In this section, we present the main algorithm which relies on the previously defined assumption function and the assumption fix-point.
 
 \begin{algorithmic}
-	\Function{ParameterSynthesis}{}
-		\State \text{partition $\mathcal{K}$ into partitions $\mathcal{K}_1, ..., \mathcal{K}_N$}
-		\State \text{parallel for each $\mathcal{K}_i$:}
-		\State \text{assign proposition assumptions}
+	\label{alg:main}
+	\Function{ParameterSynthesis}{fragment $\mathcal{K}_{id}$, property $\varphi$}
+		\State $\assume \gets \assume_\bot$
 		\Repeat
 			\Repeat
-				\While{has task}
-					\State \text{process task}
-				\EndWhile
-				\State \text{exchange data about border states}
+				\State $\mathcal{\Call{FixPoint}{\assume}}$
+				\State $\Call{MapReduce}{\assume}$
 			\Until{\Call{TerminationDetection}{}}
-			\State \text{update cycles}
+			\State $\Call{IncreaseCycles}{\assume, \varphi}$
 		\Until{\Call{TerminationDetection}{}}
+		\State $\mathcal{F}(s) \gets \assumeT(\varphi, s, h_0)$
 	\EndFunction
-	
-	\Function{ProcessTask}{$\phi_1, s, h$}
-		\ForAll{$\psi \in cl(\varphi) : \psi = \withTime{t}\ctlE\dctlX{\chi} \phi_1$}
-			\ForAll{$ p \in \withTime{t}pred(s) : f(p) = id $}
-				\State $witnesses \gets \{ \Phi_1 \land \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^t(ss, \phi_1, h) \}$
-				\State $counterExamples \gets (\{ \neg\Phi_1 \lor \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^f(ss, \phi_1, h)  \}  \}) $
-				\State $\mathcal{A}^t \gets \bigvee_{\Phi \in witnesses} \Phi$
-				\State $\mathcal{A}^f \gets tt \land \bigwedge counterExamples$
+	\Function{FixPoint}{assumption function $\assume$}
+		\Repeat
+			\State $\assume_0 \gets \assume$
+			\State $\assume \gets \mathcal{C}_{id}(\assume_0)$
+		\Until{$\assume_0 = \assume$}
+	\EndFunction
+	\Function{MapReduce}{assumption function $\assume$}
+		\State $Sent(i) \gets \assume_0$
+		\ForAll{$s \in \dtsSlocal_{id}$}
+			\ForAll{$i < N$ such that $s \in \dtsSborder_i$}
+				\State $Sent(i, \psi, h, s) \gets \assume(\psi, h, s)$
+			\EndFor
+			\ForAll{$i < N$ and $\psi : (\hctlAt{x} \psi) \in cl(\varphi) $}
+				\State $Sent(i, \psi, h, s) \gets \assume(\psi, h, s)$
 			\EndFor
 		\EndFor
-		\ForAll{$\psi \in cl(\varphi) : \psi = \withTime{t}\ctlA\dctlX{\chi} \phi_1$}
-			\ForAll{$ p \in \withTime{t}pred(s): f(p) = id $}
-				\State $witnesses \gets \{ \Phi_1 \land \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^t(ss, \phi_1, h) \}$
-				\State $counterExamples \gets (\{ \neg\Phi_1 \lor \Phi_2 \mid (ss, d, \Phi_1) \in \withTime{t}succ(p) \land d \models \chi \land \Phi_2 = \mathcal{A}^f(ss, \phi_1, h)  \} \lor \{  \}) $
-				\State $\mathcal{A}^f \gets \bigvee_{\Phi \in witnesses} \Phi$
-				\State $\mathcal{A}^t \gets tt \land \bigwedge counterExamples$
-			\EndFor			
-		\EndFor		
+		\State $\Call{Send}{Sent}$
+		\State $Received \gets \Call{Receive}$
+		\State $\assume(\psi, h, s) \Leftarrow \bigcup_{i < N} Received(i, \psi, h, s)$
 	\EndFunction
-	
+	\Function{IncreaseCycles}{assumption function $\assume$, property $\varphi$}
+		\State $Finished(h, s) \gets \ttrue $
+		\ForAll{$\psi \in sub(\varphi)$}
+			\State $Finished(h, s) = Finished(h, s) \land \neg \Call{IncreaseCycles}{\mathcal{A}, \psi}(h, s)$
+		\EndFor
+		\State $Unknown(h, s) \gets \neg \assumeT(\varphi, h, s) \land \neg \assumeF(\varphi, h, s)$		
+		\State $\assumeF(\varphi, h, s) \Leftarrow Unknown(h, s) \land Finished(h,s)$
+		\State \Return $Unknown$
+	\EndFunction	
 \end{algorithmic}
+
+The algorithm starts with a fully unknown assignment and continues to the main loop, which iteratively computes new fix-point assumptions and performs necessary communication. As soon as no new information can be gained using this procedure, the algorithm will proceed to mark unknown parameter valuations as unsatisfied, assuming all sub-formulae have been successfully computed.

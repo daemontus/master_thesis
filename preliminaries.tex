@@ -279,6 +279,7 @@ We assume the following expressions can be used to reason about the parameter fo
 	\item $\withTime{t}dir(s, \chi ,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT \land d \models \chi$; which represents all parameters for which the transition is enabled and the given direction constraint is satisfied.
 \end{itemize}
 
+When reasoning about parameter formulae, we will use semantic equality (i.e. $\Phi_1 \equiv \Phi_2 \iff \forall p \in \pdtsP : p \models \Phi_1 \iff p \models \Phi_2$). In cases where syntactic equality is used instead of semantic equality, this fact will be explicitly stated. Notice that this allows us to reason about parameter formulae similarly to standard parameter sets.
 
 \section{Parameter Synthesis}
 
