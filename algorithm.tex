@@ -19,15 +19,17 @@ Note that not all of these structures have to be represented explicitly. For exa
 
 \section{Assumption semantics}
 
-In order to represent the intermediate results during a computation and accommodate for the distributed nature of the \ac{PDTS} fragments, we introduce the notion of assumptions and related assumption semantics of the \ac{HUCTLp} formulae.
+In order to represent the intermediate results during a computation and accommodate for the distributed nature of the \ac{PDTS} fragments, we introduce the notion of assumptions and related assumption semantic function for the \ac{HUCTLp} formulae.
 
-\subsection{Definition}
+\subsection{Assumption}
 
-We define a positive assumption function $\assumeT_i(\psi, h, s) = \Phi$ and a negative assumption function $\assumeF_i(\psi, h, s) = \Phi$ where $\psi \in cl(\varphi)$ is a sub-formula of the property $\varphi$, $h: Var \to \dtsS$ is a valuation of state variables, $s \in \dtsS$ is a state (not necessarily local or border) and $\Phi$ is a parameter constrain. When the fragment is clear from context, we can omit the subscript $i$.
+We define an assumption function for fragment $i$ as $\assume_i(\psi, h, s) = (\Phi^\top, \Phi^\bot)$. Collectively, assumption functions of all fragments represent the knowledge about the system accumulated so far. Specifically, the property $\psi$ is assumed to hold in state $s$ and valuation $h$ under parameter valuations $p \in \pdtsP$ such that $p \models \Phi^\top$ and symmetrically, $\psi$ is assumed not to hold for parameter valuations $p \models \Phi^\bot$.
 
-We intuitively say that for the positive assumption function $\assumeT$, $\psi$ is assumed to hold in state $s$ for valuation $h$ and parameters $\{p \in \pdtsP \mid p \models \Phi \}$ and analogically for the negative assumption function $\psi$ is expected not to hold. Based on this interpretation, we also assume that for a valid pair of assumption functions, parameter constrain $\assumeT(\psi, s, h) \land \assumeF(\psi, s, h)$ can never be satisfied - i.e. $\psi$ cannot be assumed to be valid and invalid at the same time.
+We will write $\assumeT_i(\psi, h, s)$ and $\assumeF_i(\psi, h, s)$ to denote an assumption function which returns just the first parameter constrain $\Phi^\top$ and $\Phi^\bot$ respectively. Finally, when the fragment identifier is clear from context, we can omit the subscript $i$.
 
-Also observe that the formula $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. As we will see later, this can happen either due to circular dependency between assumptions or due to missing information from other \ac{PDTS} fragments.
+Based on the intuitive meaning of the assumption function, we also assume that for a valid pair of assumption functions, parameter constrain $\assumeT(\psi, s, h) \land \assumeF(\psi, s, h)$ can never be satisfied - i.e. $\psi$ cannot be assumed to be valid and invalid at the same time.
+
+Furthermore, observe that the formula $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. As we will see later, this can happen either due to circular dependency between assumptions or due to missing information from other \ac{PDTS} fragments.
 
 
 Initially, all assumptions start as $\ffalse$, hence the set of valid and invalid parameter valuations is empty and the set of unknown parameter valuations is the whole universe.
