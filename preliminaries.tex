@@ -270,7 +270,7 @@ TODO: define transitions with d,p, with d, and without anything
 \subsection{Parameter representation}
 \label{sec:paramRepresentation}
 
-In this work, we assume that the parameters of the \ac{PDTS} are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $\tP{s}{t} = \{ p \in \pdtsP \mid p \models \Phi \}$. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will also use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} formulae.
+In this work, we assume that the parameters of the \ac{PDTS} are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $\tP{s}{t} = \{ p \in \pdtsP \mid p \models \Phi \}$. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will also use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} properties.
 
 We assume the following expressions can be used to reason about the parameter formulae describing a specific \ac{PDTS}:
 
@@ -279,7 +279,7 @@ We assume the following expressions can be used to reason about the parameter fo
 	\item $\withTime{t}dir(s, \chi ,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT \land d \models \chi$; which represents all parameters for which the transition is enabled and the given direction constraint is satisfied.
 \end{itemize}
 
-When reasoning about parameter formulae, we will use semantic equality (i.e. $\Phi_1 \equiv \Phi_2 \iff \forall p \in \pdtsP : p \models \Phi_1 \iff p \models \Phi_2$). In cases where syntactic equality is used instead of semantic equality, this fact will be explicitly stated. Notice that this allows us to reason about parameter formulae similarly to standard parameter sets.
+When reasoning about parameter formulae, we will usually use semantic equality (i.e. $\Phi_1 \equiv \Phi_2 \iff \forall p \in \pdtsP : p \models \Phi_1 \iff p \models \Phi_2$). In cases where syntactic equality is used instead of semantic equality, this fact will be explicitly stated. Notice that this allows us to reason about parameter formulae similarly to standard sets, however this needs to be taken into account when reasoning about complexity of various operations.
 
 \section{Parameter Synthesis}
 

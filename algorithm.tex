@@ -19,85 +19,113 @@ Note that not all of these structures have to be represented explicitly. For exa
 
 \section{Assumption semantics}
 
-In order to represent the intermediate results during a computation and accommodate for the distributed nature of the \ac{PDTS} fragments, we introduce the notion of assumptions and related assumption semantic function for the \ac{HUCTLp} formulae.
+In order to represent the intermediate results during the computation and accommodate for the distributed nature of the \ac{PDTS} fragments, we introduce the notion of assumptions and related assumption semantic function for the \ac{HUCTLp} formulae.
 
-\subsection{Assumption}
+\subsection{Assumption function}
 
-We define an assumption function for fragment $i$ as $\assume_i(\psi, h, s) = (\Phi^\top, \Phi^\bot)$. Collectively, assumption functions of all fragments represent the knowledge about the system accumulated so far. Specifically, the property $\psi$ is assumed to hold in state $s$ and valuation $h$ under parameter valuations $p \in \pdtsP$ such that $p \models \Phi^\top$ and symmetrically, $\psi$ is assumed not to hold for parameter valuations $p \models \Phi^\bot$.
+We define an assumption function for fragment $i$ as $\assume_i(\psi, h, s) = (\Phi^\top, \Phi^\bot)$, meaning that the \ac{HUCTLp} property $\psi$ is assumed to hold in state $s \in \dtsS$ and valuation $h : \var \to \dtsS$ under parameter valuations $p \in \pdtsP$ such that $p \models \Phi^\top$ and symmetrically, $\psi$ is assumed \emph{not} to hold for parameter valuations $p \models \Phi^\bot$. Collectively, assumption functions of all fragments represent the total knowledge about the system accumulated so far.
 
-We will write $\assumeT_i(\psi, h, s)$ and $\assumeF_i(\psi, h, s)$ to denote an assumption function which returns just the first parameter constrain $\Phi^\top$ and $\Phi^\bot$ respectively. Finally, when the fragment identifier is clear from context, we can omit the subscript $i$.
+We will write $\assumeT_i(\psi, h, s)$ and $\assumeF_i(\psi, h, s)$ to denote an assumption function which returns just the first parameter constrain $\Phi^\top$ or second parameter constrain $\Phi^\bot$ respectively. Finally, when the fragment identifier is clear from context, we can omit the subscript $i$.
 
-Based on the intuitive meaning of the assumption function, we also assume that for a valid pair of assumption functions, parameter constrain $\assumeT(\psi, s, h) \land \assumeF(\psi, s, h)$ can never be satisfied - i.e. $\psi$ cannot be assumed to be valid and invalid at the same time.
-
-Furthermore, observe that the formula $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. As we will see later, this can happen either due to circular dependency between assumptions or due to missing information from other \ac{PDTS} fragments.
-
-
-Initially, all assumptions start as $\ffalse$, hence the set of valid and invalid parameter valuations is empty and the set of unknown parameter valuations is the whole universe.
-
-Finally, note that due to the presence of the unknown parameter valuations, these intuitive equalities do not always hold:
+We say that an assumption $\assume(\varphi, s, h) = (\Phi^\top, \Phi^\bot)$ about the \ac{PDTS} $\mathcal{K}$ is \emph{valid} when for all $p$ holds that
 
 \begin{align*}
-	\assumeT(\psi, s, h) & \not= \neg \assumeF(\psi, s, h) \\
-	\assumeT(\psi, s, h) & \not= \neg \assumeT(\neg \psi, s, h)
+	(p \models \Phi^\top \Rightarrow (\mathcal{K}_p, s, h) \models \varphi) \land (p \models \Phi^\bot \Rightarrow (\mathcal{K}_p, s, h) \not\models \varphi) 
 \end{align*}
 
-In the first case, the expression $\neg \assumeF(\psi, s, h)$ represents not only parameters for which $\psi$ is satisfied, but also parameters for which the result is unknown. Similarly, in the second case, $\neg \assumeT(\neg \psi, s, h)$ denotes not only parameters for which the $\neg \psi$ is not satisfied (hence $\psi$ is satisfied) but also unknown parameter valuations. This is due to the fact that the negation in these equivalences is used to compare different context: assumptions, parameter formulae and \ac{HUCTLp} formulae. However, as long as the set of unknown parameter valuations is empty, these equivalences are valid.
+From now on, we will only consider valid assumption functions unless stated otherwise. Furthermore, from this definition, we can conclude several important properties of valid assumption functions:
 
-\subsection{Semantics}
+\begin{itemize}
+	\item Assumption implies satisfaction, but satisfaction does not necessarily imply assumption.
+	\item Parameter constrain $\assumeT(\psi, s, h) \land \assumeF(\psi, s, h)$ can never be satisfiable - i.e. $\psi$ cannot be assumed to be valid and invalid at the same time.
+	\item Parameter constrain $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. We will denote this parameter constrains as $\assumeU(\psi, s, h)$.
+	\item These intuitive equalities hold only when the set of unknown parameter valuations is empty:
+	
+	\begin{align*}
+		\assumeT(\psi, s, h) & \not\equiv \neg \assumeF(\psi, s, h) \\
+		\assumeT(\psi, s, h) & \not\equiv \neg \assumeT(\neg \psi, s, h)
+	\end{align*}
+	
+	The expression $\neg \assumeF(\psi, s, h)$ represents not only parameters for which $\psi$ is satisfied, but also parameters for which the result is unknown. Similarly, in the second case, $\neg \assumeT(\neg \psi, s, h)$ denotes not only parameters for which the $\neg \psi$ is not satisfied (hence $\psi$ is satisfied) but also unknown parameter valuations.
+	
+\end{itemize}
 
-With the general caveats of the assumption functions described, we are ready to give a recursive definition of an assumption function for a \ac{HUCTLp} formula over a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$. In this definition, we do not use the full operator set of \ac{HUCTLp}, but rather the simplified set of operators defined in section \ref{sec:huctlEnd}. The definition is divided into several parts.
+We assume a partial ordering on the set of all possible assumption functions over \ac{PDTS} fragment $\mathcal{K}$ based on the number of the unknown parameter valuations. Formally:
+
+\begin{align*}
+	\assume_1 < \assume_2 \iff & \forall \psi, s, h : \\
+	 & |\{ p \mid p \models \assumeU_1(\psi, s, h) \}| < |\{ p \mid p \models \assumeU_2(\psi, s, h) \}|
+\end{align*}
+
+Under such ordering, the set of all assumption functions forms a complete lattice. 
+
+Finally, we will use $\assume_0$ to denote an assumption function which has all results initialised to $(\ffalse, \ffalse)$, hence the set of the valid and invalid parameter valuations is empty and the set of the unknown parameter valuations is the whole parameter universe.
+
+\subsection{Semantic function}
+
+In order to compute the maximal valid assumption function for a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$, we define a semantic function $\mathcal{C}_\mathcal{K}(\assume_{in}) = \assume_{out}$ which increases the given assumption (with respect to the ordering) while preserving assumption validity.
+
+In this definition, we do not use the full operator set of \ac{HUCTLp}, but rather the simplified set of operators defined in section \ref{sec:huctlEnd}. The definition uses a special assignment operator $\assume(\psi, s, h) \Leftarrow \Phi$ which means that the parameter constrain $\Phi$ is added to the current assumptions, formally:
+
+\begin{align*}
+	\assume(\psi, s, h) \Leftarrow \Phi \equiv \assume(\psi, s, h) \gets \assume(\psi, s, h) \lor \Phi
+\end{align*}
+
+Also observe that this operation is monotonic with respect to the assumption function ordering, that is, the cardinality of the set of unknown parameter valuations cannot increase by applying $\Leftarrow$.
+
+The definition itself is divided into several parts, based on the \ac{HUCTLp} operators it deals with. Each part declaratively defines the new assumption function $\assume_{out}$ based on the given $\assume_{in}$.
 
 First part describes the initial assumptions of the system. Here, $p \in \dtsAP$ is an atomic proposition and $x \in Var$ is a state variable.
 
 \begin{align*}
-	\assumeT(true, s, h) & = \Phi_I \\
-	\assumeF(true, s, h) & = \neg \Phi_I \\
-	\assumeT(p, s, h) & = 
+	\assumeT_{out}(true, s, h) & \Leftarrow \Phi_I \\
+	\assumeF_{out}(true, s, h) & \Leftarrow \neg \Phi_I \\
+	\assumeT_{out}(p, s, h) & \Leftarrow 
 	\begin{cases}
 		\Phi_I & p \in \dtsL(s) \\
 		\ffalse & \texttt{otherwise} \\
 	\end{cases}
 	\\
-	\assumeF(p, s, h) & = \neg \assumeT(p, s, h) \\
-	\assumeT(x, s, h[ x \mapsto s' ]) & = 
+	\assumeF_{out}(p, s, h) & \Leftarrow \neg \assumeT_{in}(p, s, h) \\
+	\assumeT_{out}(x, s, h[ x \mapsto s' ]) & \Leftarrow
 	\begin{cases}
 		\Phi_I & s = s' \\
 		\ffalse & \texttt{otherwise}
 	\end{cases}
 	\\
-	\assumeF(x, s, h[ x \mapsto s']) & = \neg \assumeT(x, s, h[ x \mapsto s' ]) \\
+	\assumeF_{out}(x, s, h[ x \mapsto s']) & \Leftarrow \neg \assumeT_{in}(x, s, h[ x \mapsto s' ]) \\
 \end{align*}
 
 Please observe that in all cases, no unknown parameters are present. This naturally follows from the fact that the validity of the atomic formulae depends solely on the properties of the system and the variable valuation, and hence can be resolved unambiguously.
 
-In the second part, we provide the semantics for the temporal operators.
+In the second part, we provide the semantics for the temporal operators:
 
 \begin{align*}
-	\assumeT(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h)  = & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT(\varphi, s', h)] \\
-	\assumeF(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h)  = & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\varphi, s', h)] \\
+	\assumeT_{out}(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h)  \Leftarrow & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\varphi, s', h)] \\
+	\assumeF_{out}(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h) \Leftarrow & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\varphi, s', h)] \\
 	%
-	\assumeT(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h) = & \bigwedge_{s' \in \dtsS} \neg \withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT(\varphi, s', h)] \\
-	\assumeF(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h)  = & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [ \withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\varphi, s', h)] \\
+	\assumeT_{out}(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h) \Leftarrow & \bigwedge_{s' \in \dtsS} \neg \withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\varphi, s', h)] \\
+	\assumeF_{out}(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h)  \Leftarrow & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [ \withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\varphi, s', h)] \\
 	%
-	\assumeT(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  = &\ \assumeT(\varphi, s, h) \lor \\
-	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
-	 \assumeF(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  = &\ \assumeF(\varphi, s, h) \land \\
-	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeF(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
+	\assumeT_{out}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeT_{in}(\varphi, s, h) \lor \\
+	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT_{in}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
+	 \assumeF_{out}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeF_{in}(\varphi, s, h) \land \\
+	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeF_{in}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
 	 %
-	 \assumeT(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  = &\ \assumeT(\varphi, s, h) \lor \\
-	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
-	 \assumeF(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  = &\ \assumeF(\varphi, s, h) \land \\
-	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeF(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
+	 \assumeT_{out}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeT_{in}(\varphi, s, h) \lor \\
+	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT_{in}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
+	 \assumeF_{out}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeF_{in}(\varphi, s, h) \land \\
+	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeF_{in}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
 	 %
-	\assumeT(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeT(\varphi_2, s, h) \lor \big[ \assumeT(\varphi_1, s, h) \land \\
-	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
-	\assumeF(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeF(\varphi_2, s, h) \land \big[ \assumeF(\varphi_1, s, h) \lor \\
-	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	\assumeT_{out}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeT_{in}(\varphi_2, s, h) \lor \big[ \assumeT_{in}(\varphi_1, s, h) \land \\
+	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	\assumeF_{out}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeF_{in}(\varphi_2, s, h) \land \big[ \assumeF_{in}(\varphi_1, s, h) \lor \\
+	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
 	%
-	\assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeT(\varphi_2, s, h) \lor \big[ \assumeT(\varphi_1, s, h) \land \\
-	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
-	\assumeF(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) = &\ \assumeF(\varphi_2, s, h) \land \big[ \assumeF(\varphi_1, s, h) \lor \\
-	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	\assumeT_{out}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeT_{in}(\varphi_2, s, h) \lor \big[ \assumeT_{in}(\varphi_1, s, h) \land \\
+	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	\assumeF_{out}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeF_{in}(\varphi_2, s, h) \land \big[ \assumeF_{in}(\varphi_1, s, h) \lor \\
+	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
 \end{align*}
 
 As we can see, the differences between operators and their positive and negative semantics are often very subtle, but crucial.
@@ -107,27 +135,29 @@ First of all, let us observe that due to the negation inequality, we can't simpl
 Finally, let us describe the semantics of the remaining boolean and hybrid operators:
 
 \begin{align*}
-	\assumeT(\neg \varphi, s, h) = & \assumeF(\varphi, s, h) \\
-	\assumeF(\neg \varphi, s, h) = & \assumeT(\varphi, s, h) \\
-	\assumeT(\varphi_1 \land \varphi_2, s, h) = & \assumeT(\varphi_1, s, h) \land \assumeT(\varphi_2, s, h) \\
-	\assumeF(\varphi_1 \land \varphi_2, s, h) = & \assumeF(\varphi_1, s, h) \lor \assumeF(\varphi_2, s, h) \\
-	\assumeT(\hctlBind{x} \varphi, s, h) = &\ \assumeT(\varphi, s, h[x \mapsto s]) \\
-	\assumeF(\hctlBind{x} \varphi, s, h) = &\ \assumeF(\varphi, s, h[x \mapsto s]) \\
-	\assumeT(\hctlExists{x} \varphi, s, h) = &\ \bigvee_{s' \in S} \assumeT(\varphi, s, h[x \mapsto s']) \\
-	\assumeF(\hctlExists{x} \varphi, s, h) = &\ \bigwedge_{s' \in S} \assumeF(\varphi, s, h[x \mapsto s']) \\
-	\assumeT(\hctlAt{x} \varphi, s, h[x \mapsto s']) = &\ \assumeT(\varphi, s', h[x \mapsto s']) \\
-	\assumeF(\hctlAt{x} \varphi, s, h[x \mapsto s']) = &\ \assumeF(\varphi, s', h[x \mapsto s']) \\
+	\assumeT_{out}(\neg \varphi, s, h) \Leftarrow & \assumeF_{in}(\varphi, s, h) \\
+	\assumeF_{out}(\neg \varphi, s, h) \Leftarrow & \assumeT_{in}(\varphi, s, h) \\
+	\assumeT_{out}(\varphi_1 \land \varphi_2, s, h) \Leftarrow & \assumeT_{in}(\varphi_1, s, h) \land \assumeT(\varphi_2, s, h) \\
+	\assumeF_{out}(\varphi_1 \land \varphi_2, s, h) \Leftarrow & \assumeF_{in}(\varphi_1, s, h) \lor \assumeF(\varphi_2, s, h) \\
+	\assumeT_{out}(\hctlBind{x} \varphi, s, h) \Leftarrow &\ \assumeT_{in}(\varphi, s, h[x \mapsto s]) \\
+	\assumeF_{out}(\hctlBind{x} \varphi, s, h) \Leftarrow &\ \assumeF_{in}(\varphi, s, h[x \mapsto s]) \\
+	\assumeT_{out}(\hctlExists{x} \varphi, s, h) \Leftarrow &\ \bigvee_{s' \in S} \assumeT_{in}(\varphi, s, h[x \mapsto s']) \\
+	\assumeF_{out}(\hctlExists{x} \varphi, s, h) \Leftarrow &\ \bigwedge_{s' \in S} \assumeF_{in}(\varphi, s, h[x \mapsto s']) \\
+	\assumeT_{out}(\hctlAt{x} \varphi, s, h[x \mapsto s']) \Leftarrow &\ \assumeT_{in}(\varphi, s', h[x \mapsto s']) \\
+	\assumeF_{out}(\hctlAt{x} \varphi, s, h[x \mapsto s']) \Leftarrow &\ \assumeF_{in}(\varphi, s', h[x \mapsto s']) \\
 \end{align*}
 
-If we assume an ordering on the parameter formulae based on the size of the set of parameter valuations which satisfy it, we can clearly see that all assumption functions are monotonic, therefore according to XXX theorem, there exists a maximum fix-point assumption that can't be increased any further. (TODO: They are NOT monotonic is we don't start at ff, define operator $\gets$ which will fix this)
+As we can see, the semantic function computed according to the rules presented in this section is clearly monotonic (thanks to the $\Leftarrow$ operator) with respect to the complete lattice formed by the assumption functions of $\mathcal{K}$. Therefore according to [CITE], $\mathcal{C}$ has a minimum fix point.
 
-\subsection{Assumption validity}
+\subsection{Semantic function validity}
 
-We say that the assumption about the \ac{PDTS} $\mathcal{K}$ is \emph{valid} when $\forall p \in \pdtsP : p \models \assumeT(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \models \varphi$ and $ p \models \assumeF(\varphi, s, h) \Rightarrow (\mathcal{K}_p, s, h) \not\models \varphi$. That is, an assumption implies satisfaction, but satisfaction does not imply assumption.
+Even though the monotonicity of the semantic function is rather obvious, the validity of the resulting assumption function might not be entirely clear, especially for the temporal operators, which are originally defined using infinite runs rather than recursively based on the \ac{PDTS} transitions.
 
-We consider the validity of the atomic proposition assumptions and hybrid operator assumptions as obvious, since they can be almost directly translated to the original definitions. However, the validity of the temporal assumptions might not be entirely clear, since the original definition uses infinite runs, while the assumptions are defined recursively using the \ac{PDTS} transitions.
+Lemma: Given a valid assignment $\assume_{in}$, the semantic function $\mathcal{C}(\assume_{in})$ produces a valid assignment.
 
-In order to mitigate this uncertainty, we show a full validity proof for the positive assumption of the $\withTime{t}\ctlA\dctlUl{\chi}$ operator—one of the most complex temporal operators. Proofs for other operators (and negative assumptions) are very similar.
+First, we consider the validity of the atomic proposition assumptions and hybrid operator assumptions as obvious, since they can be almost directly translated to their original definitions. 
+
+Next, we show a full validity proof for the positive assumption of the $\withTime{t}\ctlA\dctlUl{\chi}$ operator—one of the most complex temporal operators. Proofs for other operators (and their negative counterparts) are very similar.
 
 \begin{itemize}
 	\item Assume all current $\assumeT$ and $\assumeF$ are valid and we are considering $ \psi = \withTime{t} \ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2 ]$.
