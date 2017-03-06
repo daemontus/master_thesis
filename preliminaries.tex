@@ -261,7 +261,7 @@ In order to reason about systems with parameters, we extend the definition of \a
 
 \subsection{Definition}
 
-Let \acl{PDTS} be a tuple $\mathcal{K} = \pdtsTuple$  where $\pdtsP$ is a finite set of parameter valuations and $\pdtsT$ is a parametrised transition relation $\pdtsT \subseteq \dtsS \times \dtsDir \times \pdtsP \times \dtsS$. We use the notation $\pdtsT_p$ to denote the parametrised transition relation restricted to a specific parameter valuation $p$, i.e. $\pdtsT_p = \{ (s, d, p', s') \in \pdtsT \mid p' = p \}$.  We then write $\mathcal{K}_p$ to denote a specific parametrisation of the original $\mathcal{K}$—a \ac{DTS} such that $\mathcal{K}_p = (\dtsS, \dtsDir, \dtsT_p, \dtsAP, \dtsL)$. 
+Let \acl{PDTS} be a tuple $\mathcal{K} = \pdtsTuple$  where $\pdtsP$ is a finite set of parameter valuations and $\pdtsT$ is a parametrised transition relation $\pdtsT \subseteq \dtsS \times \dtsDir \times \pdtsP \times \dtsS$. We use the notation $\pdtsT_p$ to denote the parametrised transition relation restricted to a specific parameter valuation $p$, i.e. $\pdtsT_p = \{ (s, d, s') \in \dtsS \times \dtsDir \times \dtsS \mid (s, d, p, s') \in \pdtsT \}$.  We then write $\mathcal{K}_p$ to denote a specific parametrisation of the original $\mathcal{K}$—a \ac{DTS} such that $\mathcal{K}_p = (\dtsS, \dtsDir, \dtsT_p, \dtsAP, \dtsL)$. 
 
 We will write $\tP{s}{t}$ to denote the set of all parameter valuations for which the transition from $s$ to $t$ is allowed: $\tP{s}{t} = \{ p \in \pdtsP \mid \exists d \in \dtsDir : (s, d, p, t) \in \pdtsT \}$. The notion of time flows also naturally extends to \acp{PDTS} with $\future\pdtsT = \pdtsT$ and $\past\pdtsT = \{ (s, d, p, s') \mid (s', d, p, s) \in \pdtsT \}$.
 
@@ -270,7 +270,7 @@ TODO: define transitions with d,p, with d, and without anything
 \subsection{Parameter representation}
 \label{sec:paramRepresentation}
 
-In this work, we assume that the parameters of the \ac{PDTS} are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $\tP{s}{t} = \{ p \in \pdtsP \mid p \models \Phi \}$. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will also use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} properties.
+In this work, we assume that the parameters of the \ac{PDTS} $\mathcal{K}$ are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $p \models \Phi \iff p \in \tP{s}{t}$. We call such formula a parameter constrain. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} properties.
 
 We assume the following expressions can be used to reason about the parameter formulae describing a specific \ac{PDTS}:
 

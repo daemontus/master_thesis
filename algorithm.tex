@@ -1,29 +1,12 @@
 In this section, we describe the algorithm used for the parameter synthesis computation.
 
-\section{Environment and data structures}
-
-The algorithm presented in this work assumes a distributed environment of $N$ independent, reliable agents connected using reliable communication channels. In practice, such model is suitable to model multi core machines and small to medium computational clusters where fault tolerance is not strictly necessary. In the end of this chapter, we will shortly explore the possibilities of adapting the algorithm to possible agent failure. 
-
-We assume that each agent has locally access to the following data structures:
-
-\begin{itemize}
-	\item Total number of communicating agents $N$;
-	\item A unique agent identifier $id \in \{ 1, \ldots, N \}$;
-	\item A partition function $f : \dtsS \to \{1, \ldots, N \}$
-	\item A \ac{PDTS} fragment $\mathcal{K}_i$;
-	\item A \ac{HUCTLp} formula $\varphi$;
-	\item An initial parameter constrain $\Phi_I$;
-\end{itemize}
-
-Note that not all of these structures have to be represented explicitly. For example, the \ac{PDTS} fragment and the partition function is usually computed on-the-fly.
-
 \section{Assumption semantics}
 
 In order to represent the intermediate results during the computation and accommodate for the distributed nature of the \ac{PDTS} fragments, we introduce the notion of assumptions and related assumption semantic function for the \ac{HUCTLp} formulae.
 
 \subsection{Assumption function}
 
-We define an assumption function for fragment $i$ as $\assume_i(\psi, h, s) = (\Phi^\top, \Phi^\bot)$, meaning that the \ac{HUCTLp} property $\psi$ is assumed to hold in state $s \in \dtsS$ and valuation $h : \var \to \dtsS$ under parameter valuations $p \in \pdtsP$ such that $p \models \Phi^\top$ and symmetrically, $\psi$ is assumed \emph{not} to hold for parameter valuations $p \models \Phi^\bot$. Collectively, assumption functions of all fragments represent the total knowledge about the system accumulated so far.
+We define an assumption function for a \ac{PDTS} fragment $i$ as $\assume_i(\psi, h, s) = (\Phi^\top, \Phi^\bot)$, meaning that the \ac{HUCTLp} property $\psi$ is assumed to hold in state $s \in \dtsS$ and valuation $h : \var \to \dtsS$ under parameter valuations $p \in \pdtsP$ such that $p \models \Phi^\top$ and symmetrically, $\psi$ is assumed \emph{not} to hold for parameter valuations $p \models \Phi^\bot$. Collectively, assumption functions of all fragments represent the total knowledge about the system accumulated so far.
 
 We will write $\assumeT_i(\psi, h, s)$ and $\assumeF_i(\psi, h, s)$ to denote an assumption function which returns just the first parameter constrain $\Phi^\top$ or second parameter constrain $\Phi^\bot$ respectively. Finally, when the fragment identifier is clear from context, we can omit the subscript $i$.
 
@@ -50,7 +33,7 @@ From now on, we will only consider valid assumption functions unless stated othe
 	
 \end{itemize}
 
-We assume a partial ordering on the set of all possible assumption functions over \ac{PDTS} fragment $\mathcal{K}$ based on the number of the unknown parameter valuations. Formally:
+We assume a partial ordering on the set of all possible assumption functions over \ac{PDTS} fragment $\mathcal{K}_i$ based on the number of the unknown parameter valuations. Formally:
 
 \begin{align*}
 	\assume_1 < \assume_2 \iff & \forall \psi, s, h : \\
@@ -63,7 +46,7 @@ Finally, we will use $\assume_0$ to denote an assumption function which has all 
 
 \subsection{Semantic function}
 
-In order to compute the maximal valid assumption function for a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$, we define a semantic function $\mathcal{C}_\mathcal{K}(\assume_{in}) = \assume_{out}$ which increases the given assumption (with respect to the ordering) while preserving assumption validity.
+In order to compute the maximal valid assumption function for a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$, we define a semantic function $\mathcal{C}_\mathcal{K}(\assume_{in}) = \assume_{out}$ which (if possible) increases the given assumption (with respect to the ordering) while preserving assumption validity.
 
 In this definition, we do not use the full operator set of \ac{HUCTLp}, but rather the simplified set of operators defined in section \ref{sec:huctlEnd}. The definition uses a special assignment operator $\assume(\psi, s, h) \Leftarrow \Phi$ which means that the parameter constrain $\Phi$ is added to the current assumptions, formally:
 
@@ -78,55 +61,68 @@ The definition itself is divided into several parts, based on the \ac{HUCTLp} op
 First part describes the initial assumptions of the system. Here, $p \in \dtsAP$ is an atomic proposition and $x \in Var$ is a state variable.
 
 \begin{align*}
-	\assumeT_{out}(true, s, h) & \Leftarrow \Phi_I \\
-	\assumeF_{out}(true, s, h) & \Leftarrow \neg \Phi_I \\
+	\assumeT_{out}(true, s, h) & \Leftarrow \ttrue \\
+	\assumeF_{out}(true, s, h) & \Leftarrow \ffalse \\
 	\assumeT_{out}(p, s, h) & \Leftarrow 
 	\begin{cases}
-		\Phi_I & p \in \dtsL(s) \\
+		\ttrue & p \in \dtsL(s) \\
 		\ffalse & \texttt{otherwise} \\
 	\end{cases}
 	\\
-	\assumeF_{out}(p, s, h) & \Leftarrow \neg \assumeT_{in}(p, s, h) \\
+	\assumeF_{out}(p, s, h) & \Leftarrow 
+	\begin{cases}
+		\ffalse & p \in \dtsL(s) \\
+		\ttrue & \texttt{otherwise} \\
+	\end{cases}
+	\\
 	\assumeT_{out}(x, s, h[ x \mapsto s' ]) & \Leftarrow
 	\begin{cases}
-		\Phi_I & s = s' \\
+		\ttrue & s = s' \\
 		\ffalse & \texttt{otherwise}
 	\end{cases}
 	\\
-	\assumeF_{out}(x, s, h[ x \mapsto s']) & \Leftarrow \neg \assumeT_{in}(x, s, h[ x \mapsto s' ]) \\
+	\assumeF_{out}(x, s, h[ x \mapsto s']) & \Leftarrow
+	\begin{cases}
+		\ttrue & s = s' \\
+		\ffalse & \texttt{otherwise}
+	\end{cases}
+	\\
 \end{align*}
 
 Please observe that in all cases, no unknown parameters are present. This naturally follows from the fact that the validity of the atomic formulae depends solely on the properties of the system and the variable valuation, and hence can be resolved unambiguously.
 
 In the second part, we provide the semantics for the temporal operators:
 
-\begin{align*}
-	\assumeT_{out}(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h)  \Leftarrow & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\varphi, s', h)] \\
-	\assumeF_{out}(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h) \Leftarrow & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\varphi, s', h)] \\
+
+\scalebox{0.7}{\parbox{.5\linewidth}{%
+	\begin{align*}
+	\assumeT_{out}(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h)  \Leftarrow & \bigvee_{s' \in (\dtsSlocal \cup \dtsSborder)} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\varphi, s', h)] \\
+	\assumeF_{out}(\withTime{t}\ctlE\dctlX{\chi} \varphi, s, h) \Leftarrow & \bigwedge_{s' \in (\dtsSlocal \cup \dtsSborder)} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\varphi, s', h)] \\
 	%
-	\assumeT_{out}(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h) \Leftarrow & \bigwedge_{s' \in \dtsS} \neg \withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\varphi, s', h)] \\
-	\assumeF_{out}(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h)  \Leftarrow & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [ \withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\varphi, s', h)] \\
+	\assumeT_{out}(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h) \Leftarrow & \bigwedge_{s' \in (\dtsSlocal \cup \dtsSborder)} \neg \withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\varphi, s', h)] \\
+	\assumeF_{out}(\withTime{t}\ctlA\dctlX{\chi} \varphi, s, h)  \Leftarrow & \bigvee_{s' \in (\dtsSlocal \cup \dtsSborder)} \withTime{t}trans(s,s') \land [ \withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\varphi, s', h)] \\
 	%
 	\assumeT_{out}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeT_{in}(\varphi, s, h) \lor \\
-	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT_{in}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
-	 \assumeF_{out}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeF_{in}(\varphi, s, h) \land \\
-	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeF_{in}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
-	 %
-	 \assumeT_{out}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeT_{in}(\varphi, s, h) \lor \\
-	 & \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT_{in}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
-	 \assumeF_{out}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeF_{in}(\varphi, s, h) \land \\
-	 & \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeF_{in}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
-	 %
+	& \bigvee_{s' \in (\dtsSlocal \cup \dtsSborder)} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT_{in}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
+	\assumeF_{out}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeF_{in}(\varphi, s, h) \land \\
+	& \bigwedge_{s' \in (\dtsSlocal \cup \dtsSborder)} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeF_{in}(\withTime{t}\ctlE\dctlFW{\chi} \varphi, s', h) ] \\
+	%
+	\assumeT_{out}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeT_{in}(\varphi, s, h) \lor \\
+	& \bigwedge_{s' \in (\dtsSlocal \cup \dtsSborder)} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeT_{in}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
+	\assumeF_{out}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s, h)  \Leftarrow &\ \assumeF_{in}(\varphi, s, h) \land \\
+	& \bigvee_{s' \in (\dtsSlocal \cup \dtsSborder)} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeF_{in}(\withTime{t}\ctlA\dctlFW{\chi} \varphi, s', h) ] \\
+	%
 	\assumeT_{out}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeT_{in}(\varphi_2, s, h) \lor \big[ \assumeT_{in}(\varphi_1, s, h) \land \\
-	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	& \bigvee_{s' \in (\dtsSlocal \cup \dtsSborder)} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
 	\assumeF_{out}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeF_{in}(\varphi_2, s, h) \land \big[ \assumeF_{in}(\varphi_1, s, h) \lor \\
-	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	& \bigwedge_{s' \in (\dtsSlocal \cup \dtsSborder)} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\withTime{t}\ctlE[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
 	%
 	\assumeT_{out}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeT_{in}(\varphi_2, s, h) \lor \big[ \assumeT_{in}(\varphi_1, s, h) \land \\
-	& \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	& \bigwedge_{s' \in (\dtsSlocal \cup \dtsSborder)} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
 	\assumeF_{out}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s, h) \Leftarrow &\ \assumeF_{in}(\varphi_2, s, h) \land \big[ \assumeF_{in}(\varphi_1, s, h) \lor \\
-	& \bigvee_{s' \in \dtsS} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
-\end{align*}
+	& \bigvee_{s' \in (\dtsSlocal \cup \dtsSborder)} \withTime{t}trans(s,s') \land [\withTime{t}dir(s, \chi, s') \Rightarrow \assumeF_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big] \\
+	\end{align*}
+}}
 
 As we can see, the differences between operators and their positive and negative semantics are often very subtle, but crucial.
 
@@ -137,8 +133,8 @@ Finally, let us describe the semantics of the remaining boolean and hybrid opera
 \begin{align*}
 	\assumeT_{out}(\neg \varphi, s, h) \Leftarrow & \assumeF_{in}(\varphi, s, h) \\
 	\assumeF_{out}(\neg \varphi, s, h) \Leftarrow & \assumeT_{in}(\varphi, s, h) \\
-	\assumeT_{out}(\varphi_1 \land \varphi_2, s, h) \Leftarrow & \assumeT_{in}(\varphi_1, s, h) \land \assumeT(\varphi_2, s, h) \\
-	\assumeF_{out}(\varphi_1 \land \varphi_2, s, h) \Leftarrow & \assumeF_{in}(\varphi_1, s, h) \lor \assumeF(\varphi_2, s, h) \\
+	\assumeT_{out}(\varphi_1 \land \varphi_2, s, h) \Leftarrow & \assumeT_{in}(\varphi_1, s, h) \land \assumeT_{in}(\varphi_2, s, h) \\
+	\assumeF_{out}(\varphi_1 \land \varphi_2, s, h) \Leftarrow & \assumeF_{in}(\varphi_1, s, h) \lor \assumeF_{in}(\varphi_2, s, h) \\
 	\assumeT_{out}(\hctlBind{x} \varphi, s, h) \Leftarrow &\ \assumeT_{in}(\varphi, s, h[x \mapsto s]) \\
 	\assumeF_{out}(\hctlBind{x} \varphi, s, h) \Leftarrow &\ \assumeF_{in}(\varphi, s, h[x \mapsto s]) \\
 	\assumeT_{out}(\hctlExists{x} \varphi, s, h) \Leftarrow &\ \bigvee_{s' \in S} \assumeT_{in}(\varphi, s, h[x \mapsto s']) \\
@@ -147,25 +143,27 @@ Finally, let us describe the semantics of the remaining boolean and hybrid opera
 	\assumeF_{out}(\hctlAt{x} \varphi, s, h[x \mapsto s']) \Leftarrow &\ \assumeF_{in}(\varphi, s', h[x \mapsto s']) \\
 \end{align*}
 
-As we can see, the semantic function computed according to the rules presented in this section is clearly monotonic (thanks to the $\Leftarrow$ operator) with respect to the complete lattice formed by the assumption functions of $\mathcal{K}$. Therefore according to [CITE], $\mathcal{C}$ has a minimum fix point.
+\subsection{Semantic function fixed point}
+
+As we can see, the semantic function computed according to the rules presented in this section is clearly monotonic (thanks to the $\Leftarrow$ operator) with respect to the complete lattice formed by the assumption functions of $\mathcal{K}$. Therefore according to the Knaster-Tarski [CITE], $\mathcal{C}$ has a least fixed point.
 
 \subsection{Semantic function validity}
 
-Even though the monotonicity of the semantic function is rather obvious, the validity of the resulting assumption function might not be entirely clear, especially for the temporal operators, which are originally defined using infinite runs rather than recursively based on the \ac{PDTS} transitions.
+Even though the monotonicity of the semantic function is rather obvious, the validity of the resulting assumption function might not be entirely clear, especially for the temporal operators, which are now defined recursively based on the \ac{PDTS} transitions rather than using infinite runs.
 
 Lemma: Given a valid assignment $\assume_{in}$, the semantic function $\mathcal{C}(\assume_{in})$ produces a valid assignment.
 
-First, we consider the validity of the atomic proposition assumptions and hybrid operator assumptions as obvious, since they can be almost directly translated to their original definitions. 
+First, we consider the validity of the atomic proposition assumptions and the hybrid operator assumptions as obvious, since they can be almost directly translated to their original definitions.
 
-Next, we show a full validity proof for the positive assumption of the $\withTime{t}\ctlA\dctlUl{\chi}$ operator—one of the most complex temporal operators. Proofs for other operators (and their negative counterparts) are very similar.
+Next, we show a full validity proof for the positive assumption of the $\withTime{t}\ctlA\dctlUl{\chi}$ operator—one of the most complex temporal operators. Proofs for other operators (and their negative counterparts) are very similar and therefore we won't list them in detail.
 
 \begin{itemize}
-	\item Assume all current $\assumeT$ and $\assumeF$ are valid and we are considering $ \psi = \withTime{t} \ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2 ]$.
-	\item For a contradiction, let us assume there exists a parameter valuation $p \in \pdtsP$ such that $p \models \assumeT(\psi, s, h)$ and $(\mathcal{K}_p, s, h) \not\models \psi$ for some $s$ and $h$.
-	\item Then we have to consider two cases:
+	\item Assume all current $\assumeT_{in}$ and $\assumeF_{out}$ are valid and we are considering $ \psi = \withTime{t} \ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2 ]$.
+	\item For a contradiction, let us assume that after application of $\mathcal{C}$, there exists a parameter valuation $p \in \pdtsP$ such that $p \models \assumeT_{out}(\psi, s, h)$ and $(\mathcal{K}_p, s, h) \not\models \psi$ for some $s$ and $h$.
+	\item According to the definition of $\mathcal{C}$, this can happen in two cases:
 	\begin{itemize}
-		\item $p \models \assumeT(\varphi_2, s, h)$ - this is in direct contradiction with the operator definition, since for all runs $\pi$ there exists $i = 0$ such that $(\mathcal{K}_p, \pi_\dtsS(i), h) \models \varphi_2$ because $\pi_\dtsS(0) = s$ (the direction requirement is trivially satisfied because there is not $j$ smaller than $0$).
-		\item $p \models \big[ \assumeT(\varphi_1, s, h) \land \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big]$. This means that not only $(\mathcal{K}_p, s, h) \models \varphi_1$, but also for all $s'$ either the the transition from $s$ is not present, or it is present, it satisfies the direction requirement, and $p \models \assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)$. Thanks to this, we see that every infinite run starting in $s$ has to use one of these transitions. Therefore either the assumption $\assumeT(\varphi_1, s, h)$ or some of the assumptions $\assumeT(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)$ are not correct.
+		\item $p \models \assumeT_{in}(\varphi_2, s, h)$ - this is in direct contradiction with the operator definition, since for all runs $\pi$ there exists $i = 0$ such that $(\mathcal{K}_p, \pi_\dtsS(i), h) \models \varphi_2$ because $\pi_\dtsS(0) = s$. Therefore $(\mathcal{K}_p, s, h) \models \psi$ (the direction requirement is trivially satisfied since there is no $j$ smaller than $0$).
+		\item $p \models \big[ \assumeT_{in}(\varphi_1, s, h) \land \bigwedge_{s' \in \dtsS} \neg\withTime{t}trans(s,s') \lor [\withTime{t}dir(s, \chi, s') \land \assumeT_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)] \big]$. This means that not only $(\mathcal{K}_p, s, h) \models \varphi_1$, but also for all $s'$ either the the transition from $s$ is not present, or if it is present, it satisfies the direction requirement, and $p \models \assumeT_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)$. Thanks to this fact, we see that every infinite run starting in $s$ has to use one of these transitions. Therefore the only case when $(\mathcal{K}_p, s, h) \not\models \psi$ is when either the assumption $\assumeT_{in}(\varphi_1, s, h)$ or some of the assumptions $\assumeT_{in}(\withTime{t}\ctlA[ \varphi_1 \dctlUl{\chi} \varphi_2], s', h)$ are not valid, which is a contradiction with our original assumption.
 	\end{itemize}
 \end{itemize}
 
@@ -173,48 +171,126 @@ Next, we show a full validity proof for the positive assumption of the $\withTim
 
 In this section, we present the main algorithm which relies on the previously defined assumption function and the assumption fix-point.
 
-\begin{algorithmic}
-	\label{alg:main}
-	\Function{ParameterSynthesis}{fragment $\mathcal{K}_{id}$, property $\varphi$}
-		\State $\assume \gets \assume_\bot$
-		\Repeat
-			\Repeat
-				\State $\mathcal{\Call{FixPoint}{\assume}}$
-				\State $\Call{MapReduce}{\assume}$
-			\Until{\Call{TerminationDetection}{}}
-			\State $\Call{IncreaseCycles}{\assume, \varphi}$
-		\Until{\Call{TerminationDetection}{}}
-		\State $\mathcal{F}(s) \gets \assumeT(\varphi, s, h_0)$
-	\EndFunction
-	\Function{FixPoint}{assumption function $\assume$}
-		\Repeat
-			\State $\assume_0 \gets \assume$
-			\State $\assume \gets \mathcal{C}_{id}(\assume_0)$
-		\Until{$\assume_0 = \assume$}
-	\EndFunction
-	\Function{MapReduce}{assumption function $\assume$}
-		\State $Sent(i) \gets \assume_0$
-		\ForAll{$s \in \dtsSlocal_{id}$}
-			\ForAll{$i < N$ such that $s \in \dtsSborder_i$}
-				\State $Sent(i, \psi, h, s) \gets \assume(\psi, h, s)$
-			\EndFor
-			\ForAll{$i < N$ and $\psi : (\hctlAt{x} \psi) \in cl(\varphi) $}
-				\State $Sent(i, \psi, h, s) \gets \assume(\psi, h, s)$
-			\EndFor
-		\EndFor
-		\State $\Call{Send}{Sent}$
-		\State $Received \gets \Call{Receive}$
-		\State $\assume(\psi, h, s) \Leftarrow \bigcup_{i < N} Received(i, \psi, h, s)$
-	\EndFunction
-	\Function{IncreaseCycles}{assumption function $\assume$, property $\varphi$}
-		\State $Finished(h, s) \gets \ttrue $
-		\ForAll{$\psi \in sub(\varphi)$}
-			\State $Finished(h, s) = Finished(h, s) \land \neg \Call{IncreaseCycles}{\mathcal{A}, \psi}(h, s)$
-		\EndFor
-		\State $Unknown(h, s) \gets \neg \assumeT(\varphi, h, s) \land \neg \assumeF(\varphi, h, s)$		
-		\State $\assumeF(\varphi, h, s) \Leftarrow Unknown(h, s) \land Finished(h,s)$
-		\State \Return $Unknown$
-	\EndFunction	
-\end{algorithmic}
+\subsection{Environment and data structures}
 
-The algorithm starts with a fully unknown assignment and continues to the main loop, which iteratively computes new fix-point assumptions and performs necessary communication. As soon as no new information can be gained using this procedure, the algorithm will proceed to mark unknown parameter valuations as unsatisfied, assuming all sub-formulae have been successfully computed.
+Before we describe the main algorithm, we have to introduce our assumptions about the environment the algorithm will be running in.
+
+The algorithm presented in this work assumes a distributed environment of $N$ independent, reliable agents connected using reliable communication channels. In practice, such model is suitable to model multi core machines and small to medium computational clusters where fault tolerance is not strictly necessary.
+
+We assume that each agent has locally access to the following data structures:
+
+\begin{itemize}
+	\item Total number of communicating agents $N$;
+	\item A unique agent identifier $id \in \{ 1, \ldots, N \}$;
+	\item A partition function $f : \dtsS \to \{1, \ldots, N \}$
+	\item A \ac{PDTS} fragment $\mathcal{K}_i$;
+	\item A \ac{HUCTLp} formula $\varphi$;
+%	\item An initial parameter constrain $\Phi_I$;
+\end{itemize}
+
+Note that not all of these structures have to be represented explicitly. For example, the \ac{PDTS} fragment and the partition function is usually computed on-the-fly.
+
+\subsection{Algorithm pseudocode}
+
+The algorithm starts with a fully unknown assignment and iteratively computes new fixed point assumptions. As soon as the fixed point is reached, a round of communication is performed to ensure all remaining fragments are notified about the updated assumptions. At this point, information from other fragments is also received. As soon as no new information can be gained using this procedure, the algorithm will proceed to mark unknown parameter valuations as unsatisfied, assuming all sub-formulae have been successfully computed.
+
+\begin{algorithm}
+	\begin{algorithmic}[1]
+		\label{alg:main}
+		\Function{ParameterSynthesis}{fragment $\mathcal{K}_{id}$, property $\varphi$}
+		\State $\assume_{id} \gets \assume_0$
+		\Repeat
+		\Repeat
+		\Repeat
+		\State $\mathcal{T} \gets \assume_{id}$
+		\State $\assume_{id} \gets \mathcal{C}(\mathcal{T})$
+		\Until{$\mathcal{T} = \assume_{id}$}
+		\State $\Call{Communicate}{\assume_{id}}$
+		\Until{\Call{TerminationDetection}{}}
+		\State $\Call{IncreaseCycles}{\assume_{id}, \varphi}$
+		\Until{\Call{TerminationDetection}{}}
+		\State $\mathcal{F}_i(s) \gets \assumeT_{id}(\varphi, s, h_0)$
+		\EndFunction
+		\Function{IncreaseCycles}{assumption function $\assume$, property $\varphi$}
+			\State for $s \in \dtsSlocal : Done(h, s) \gets \ttrue $
+			\ForAll{$\psi \in sub(\varphi)$}
+				\State $Done(h, s) = Done(h, s) \land \neg \Call{IncreaseCycles}{\mathcal{A}, \psi}(h, s)$
+			\EndFor
+			\State for $s \in \dtsSlocal : Unknown(h, s) \gets \neg \assumeT(\varphi, h, s) \land \neg \assumeF(\varphi, h, s)$		
+			\State for $s \in \dtsSlocal : \assumeF(\varphi, h, s) \Leftarrow Unknown(h, s) \land Done(h,s)$
+			\State \Return $Unknown$
+		\EndFunction
+		\Function{Communicate}{assumption function $\assume$}
+			\ForAll{$s \in \dtsSlocal_{id}$}
+				\ForAll{$i < N$ such that $s \in \dtsSborder_i$}
+					\State for all $\psi,h : \assume_i(\psi, h, s) \Leftarrow \assume_{id}(\psi, h, s)$
+				\EndFor
+				\ForAll{$i < N$ and $\psi : (\hctlAt{x} \psi) \in cl(\varphi) $}
+					\State for all $h, s : \assume_i(\psi, h, s) \Leftarrow \assume_{id}(\psi, h, s)$
+				\EndFor
+			\EndFor
+		\EndFunction
+	\end{algorithmic}	
+\end{algorithm}
+
+Here, the $\textsc{TerminationDetection}$ procedure will return true only if the assumptions have not changed since last termination attempt and no communication is taking place. We don't discuss a specific implementation for this procedure, since termination detection in distributed systems is a well studied problem [CITE] and an optimal implementation will probably depend on the available communication primitives in our environment.
+
+To simplify the description of the $\textsc{Communication}$ procedure, we assume that each agent can directly update assumptions of other agents. This is of course an unrealistic expectation in a distributed system. In reality, this form of communication assumes a proper message is sent, received and handled by the receiving agent. However, we don't provide an explicit pseudocode for this, since it is, similar to the $\textsc{TerminationDetection}$, a problem which largely depends on the environment (in a multi-core machine simulating the distributed environment, even a direct update can be possible) and has been efficiently solved before [CITE].
+
+Finally, let us observe that the complete solution to the parameter synthesis problem can be constructed from the partial solutions computed by each fragment as follows:
+
+\begin{align*}
+	\mathcal{F}(s) = \bigvee_{i \in \{1, \ldots, N \}} \mathcal{F}_i(s)
+\end{align*}
+
+\subsection{Proof of termination}
+
+Theorem: Alg. 1 terminates
+
+First, let us observe that since the least fixed point of $\mathcal{C}(\assume)$ always exists, the condition at line $8$ will also always terminate as soon as this fixed point is reached. Furthermore, since the communication function is also monotonic with respect to the assumption ordering, the condition at line $10$ will also eventually reach a fixed point as soon as no new assumptions can be computed either by applying the semantic function, or communicating with other processes.
+
+Finally, the function $\textsc{IncreaseCycles}$ is also monotonic, and therefore the same argument holds for the condition on line $12$. Eventually, all agents will reach a global fixed point and at that point, the system will terminate.
+
+\subsection{Proof of correctness}
+
+First, let us prove several additional lemmas about the whole algorithm that will greatly simplify the correctness proof:
+
+Lemma: Procedure \textsc{Communicate} preserves validity of the assumption function.
+
+This is almost obvious, since the \textsc{Communicate} procedure will only increase assumptions in border states if their local counterparts in corresponding fragments have the same value. Therefore assuming the information for the local states is valid (given that the semantic funciton $\mathcal{C}$ preserves assumption validity), the newly assigned information for the border states is also valid.
+
+Lemma: Assuming no value of $\assume_i(\psi, h, s)$ (globally for all $i$) can be increased either by applying $\mathcal{C}$ or by performing communication (using $\textsc{Communicate}$), the procedure \textsc{IncreaseCycles} preserves validity of the assumption function.
+
+Proof: First it should be noted that the assumption of the lemma corresponds to the conditions under which is the \textsc{IncreaseCycles} called in the algorithm (the conditions are ensured by the repeat-until loop on lines 4-10). 
+
+Second, the procedure can increase only negative assumptions about the system. Therefore, for a contradiction, let us assume that after application of $\textsc{IncreaseCycles}$ there is a fragment $\mathcal{K}_i$, a parameter valuation $p$, a property $\psi$, a variable assignment $h$ and a state $s$, such that $p \models \assumeF_i(\psi, h, s)$ but $(\mathcal{K}_p, h, s) \models \psi$. 
+
+This can only happen when the assumptions about $p$ are known for all sub-formulae of $\psi$, since the only time when the unknown assumption can increase is when the parameter valuation is marked as $Done$, which means it is not unknown in any of the sub-formulae.
+
+Because assumptions for all sub-formulae are known, the only operators for which this error can occur are the temporal weak-future and until operators. That is because all other operators depend directly on their sub-formulae, and therefore when the assumptions for the sub-formulae are known, the assumption for the formula should also be known when the fixed point is computed. This would imply that the fixed point was not computed properly, contradicting the original assumption of the lemma. 
+
+%Here we should also note that except for the $\hctlAt{x} \varphi$ operator, all operators depend only on other local and border states.  
+
+However, the expectation of the computation and communication fixed point also implies that the only possible case when assumption for such operator can be unknown is in case of a circular dependency between assumptions. Any other case would imply that either the communication has not been handled properly (and therefore we have unknown parameter valuations that should have been resolved using communication) or the fixed point hasn't finished computing (and therefore some parameter valuations can still increase due to assumptions about their successors).
+
+Finally, if a parametrisation is unknown due to a circular dependency between assumptions, it can be safely assumed to be negative. That is because such assumption cannot ever increase to a positive value, therefore also the property cannot hold in such state.
+
+Lemma: When the algorithm exits the main cycle and enters line 13, all unknown assumptions for local states $\assumeU(\psi, h, s)$ are unsatisfiable.
+
+This is easy to show, because in each iteration, the procedure \textsc{IncreaseCycles} will increase at least one parameter valuation to the negative value for some states. Assuming there are some unknown assumptions, there must be a smallest formula $\psi$ such that some of its assumptions are unknown and yet all sub-formulae are already known. These unknown assumptions are then promoted to negative ones by the \textsc{IncreaseCycles} procedure. Therefore after a finite number of repetitions, \textsc{IncreaseCycles} will increase all unknown parameter valuations to negative ones.
+
+Theorem: Algorithm 1. computes the parameter synthesis problem for a given \ac{PDTS} $\mathcal{K}$ and a given \ac{HUCTLp} property $\varphi$.
+
+By lemma X, there are no unknown parameter valuations for local states of each fragment. Therefore an union across all fragments ensures that there are no unknown parameter valuations across the whole state space. Furthermore, since the assumption functions of each fragment are valid (lemma Y), the resulting assumption function is also valid.
+
+\subsection{Notes about fixed point computation}
+
+One notable part of the algorithm that has been intentionally left out of the main pseudocode is how to compute the semantic function (and its fixed point). Similar to the \textsc{TerminationDetection} and the \textsc{Communication} procedures, there are several possible approaches which might depend on the nature of the model, the execution environment and other desired properties of the algorithm.  Instead of providing the full pseudocode for this operation, we provide a discussion of several observations and approaches that can be taken when implementing the semantic function fixed point and we refer the reader to the actual implementation of the algorithm for one specific example of such implementation.
+
+\begin{itemize}
+	\item In the definition of the semantic function, assumptions about the temporal operators usually depend on all local and border states. This requirement can be easily reduced to just the actual successors (for some parameter valuation). As we will see later, biological models provide a great case for this, since a state can usually have only small number of successors. This means that the number of assumption dependencies is often not linear in the size of state space, but rather constant or at least logarithmic.
+	\item Complexity can be further reduced by memorizing intermediate results of operations. When assumption in state $s$ depends on its $k$ successors, one can build a tree-like structure (in linear time) that can be then updated in logarithmic time when one of the dependencies changes.
+	\item Since determining whether a value of an assumption changed or not requires a semantic equality check, which is often a very expensive operation, it might be beneficial to delay such check as long as possible (without introducing additional checks later). An example of such delaying would ensure that the check is performed only when no dependencies of the assumption under question are still being updated (or waiting to be updated).
+	\item It is crucial for the effectiveness of the algorithm to maintain compact representations of the parameter formulae produced during computation. To this end, instead of using a simple formula solver, one should look for solvers that can also simplify the investigated formulae. However, such operations are usually even harder than standard formula solving. It might be therefore beneficial to employ heuristics that can delay formula simplification when not needed or that can separate parts of the formula that cannot be further simplified.
+\end{itemize}
+
