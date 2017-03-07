@@ -4,7 +4,7 @@ In this chapter, we discuss the architecture and characteristics of this impleme
 
 \section{Pithya core overview}
 
-The Pithya tool has two main components: \emph{graphical user interface} and the \emph{core engine}. In this work, we are concerned only about the core engine.
+The Pithya tool has two main components: \emph{graphical user interface} and the \emph{core engine}. Here, we are concerned only about the core engine.
 
 The core engine is implemented in an object-oriented manner using the Kotlin programming language (compiles to standard JVM byte-code). Furthermore, the engine can use the Z3 SMT solver for decisions about the parameter formulae.
 
@@ -17,7 +17,60 @@ The core engine itself is also divided into several modules:
 	\item \textbf{CLI Front-end} Provides a command line interface, combining the functionality of all modules into one executable.
 \end{itemize}
 
-In the following sections we will discuss in detail the specified modules. We will omit the temporal logic module, since its only interesting part is the \ac{HUCTLp} grammar. This grammar can be found in Appendix X.
+In the following sections we will discuss in detail the specified modules.
 
 \section{Parameter Synthesis Module}
 
+Before describing the components of the parameter synthesis module, we have to define the basic requirements it poses on anyone willing to use it:
+
+\begin{itemize}
+	\item States of the \ac{PDTS} all have unique (even across fragments) integer identifiers from a continuous range. This allows easier partitioning and provides room for interesting optimisations.
+	\item On the other hand, the parameter formula representation is fully generic, allowing the user to choose whatever domain specific representation suits their needs. The only requirement is that the user provides a solver capable of performing basic operations required by the algorithm (discussed later in this section).
+\end{itemize}
+
+Now that we have described how the parameter synthesis module approaches states and parameters, we can describe basic interfaces that need to be implemented by potential users. Here, we provide the list of all of these interfaces with short descriptions of their functionality. However, the implementations have to adhere to a set of required invariants and synchronization rules in order for the algorithm to be valid, therefore we refer the reader to the source code documentation for more detailed information about each interface.
+
+\begin{itemize}
+	\item \texttt{StateMap} State map is a simple map interface which provides a way to represent the state—parameter mapping used when computing the assumption function. However, as opposed to the assumption function, \texttt{StateMap} is a general purpose interface used throughout the code whenever a state—parameter collection is needed (successor/predecessor representation, communication, etc.). It is immutable by default, however there is a mutable variant which is used to represent incomplete results. The module provides some basic implementations:
+	
+	\begin{itemize}
+		\item \texttt{EmptyStateMap} Self-explanatory.
+		\item \texttt{SingletonStateMap} Maps one state to specified parameter formula and all remaining states to a default value.
+		\item \texttt{ConstantStateMap} Maps all states specified by a bit set to one given parameter formula. Useful for representing precomputed propositions.
+		\item \texttt{HashStateMap} Implementation backed by a standard JVM \texttt{HashMap}. Useful for sparse or small maps.
+		\item \texttt{ContinuousHashMap} Implementation backed by a continuous array (with possible offset). Useful for dense maps that need to be updated fast.
+		\item \texttt{PartitionStateMap} A view of another state map which presents only the local states of a specific fragment present in the original map.
+		\item \texttt{LazyStateMap} A state map which produces results on demand based on a given function. It is used to implement a \texttt{LazyAndMap}, \texttt{LazyOrMap} and \texttt{LazyComplementMap}.
+	\end{itemize}
+	
+	\item \texttt{Solver} The solver should be capable of providing basic constants and performing standard operations such as: Tautology, contradiction, conjunction, disjunction, complement (negation), test for emptiness (satisfiability) and formula simplification. These operations are then used to implement more complex, algorithm specific operations (Such as the $\Leftarrow$ introduced in section TODO[assumptions]). User is also free to override these default implementations assuming a more efficient alternative is available. Finally, each parameter representation must also be serializable into a byte buffer so that it can be safely transferred between fragments.
+	
+	Additionally, the module provides sample solvers based on standard collections. These usually don't scale very well with increasing number of parameter valuations, but provide a good starting point for implementing and debugging more complex solvers:
+	
+	\begin{itemize}
+		\item \texttt{BoolSolver} Basic solver for models without parameters.
+		\item \texttt{IntSetSolver} Solver which expects a set of parameter valuations that can be mapped to unique integers.
+		\item \texttt{BitSetSolver} Much faster variant of \texttt{IntSetSolver}, which additionally requires the parameter valuation identifiers to be consecutive integers (so that they can be inserted into a standard bit set).
+	\end{itemize}
+	
+	\item \texttt{Partition} Combining the \ac{PDTS} fragment with its the partition function, the \texttt{Partition} interface provides the total amount of fragments, current fragment identifier, methods for obtaining predecessors and successors of a specific state plus the ability to evaluate atomic propositions.
+	
+	Assuming the user does not want to provide his own partition function, they can implement a \texttt{Model} interface, which is a simplified version of the \texttt{Partition} which provides only the successor/predecessor generator and proposition evaluation. The \texttt{Model} can then be wrapped into one of the predefined partition functions:
+	
+	\begin{itemize}
+		\item \texttt{SingletonPartition} Partition function which maps all states to a single fragment. Useful for debugging or working in single threaded environment.
+		\item \texttt{HashPartition} Partition which assigns states to predefined number of fragments using an integer modulus as a hash function. It usually provides good levels of uniformity and concurrency, however, traditionally also requires a lot of communication.
+		\item \texttt{UniformPartition} A uniform partition divides the states into equally sized intervals and assigns each fragment one interval. It provides uniformity and assuming the identifiers of state neighbours are also numerically close to the identifier of the original state, it should also provide low communication overhead. However, in cases when the communication cost is low, the better concurrency of the \texttt{HashPartition} can result in faster computation.
+		\item \texttt{BlockPartition} A block partition is hybrid between \texttt{UniformPartition} and \texttt{HashPartition}. The partition function will divide the state space into equally sized intervals, while each fragment is assigned a predefined number of intervals.
+	\end{itemize}
+
+	Apart from the predefined partitions, the parameter synthesis module also provides a very basic explicit model implementation, which can be useful for debugging, testing and creating toy examples (it is used as a model implementation for the validity testing).
+
+	\item 
+\end{itemize}
+
+\section{ODE Model Module}
+
+
+
+\section{CLI Front-end}
