@@ -17,9 +17,11 @@ The core engine itself is also divided into several modules:
 	\item \textbf{CLI Front-end} Provides a command line interface, combining the functionality of all modules into one executable.
 \end{itemize}
 
-In the following sections we will discuss in detail the specified modules.
+In the following sections we will discuss these modules in detail.
 
 \section{Parameter Synthesis Module}
+
+\subsection{States and parameter formulae representation}
 
 Before describing the components of the parameter synthesis module, we have to define the basic requirements it poses on anyone willing to use it:
 
@@ -27,6 +29,8 @@ Before describing the components of the parameter synthesis module, we have to d
 	\item States of the \ac{PDTS} all have unique (even across fragments) integer identifiers from a continuous range. This allows easier partitioning and provides room for interesting optimisations.
 	\item On the other hand, the parameter formula representation is fully generic, allowing the user to choose whatever domain specific representation suits their needs. The only requirement is that the user provides a solver capable of performing basic operations required by the algorithm (discussed later in this section).
 \end{itemize}
+
+\subsection{User-implemented interfaces}
 
 Now that we have described how the parameter synthesis module approaches states and parameters, we can describe basic interfaces that need to be implemented by potential users. Here, we provide the list of all of these interfaces with short descriptions of their functionality. However, the implementations have to adhere to a set of required invariants and synchronization rules in order for the algorithm to be valid, therefore we refer the reader to the source code documentation for more detailed information about each interface.
 
@@ -43,14 +47,14 @@ Now that we have described how the parameter synthesis module approaches states 
 		\item \texttt{LazyStateMap} A state map which produces results on demand based on a given function. It is used to implement a \texttt{LazyAndMap}, \texttt{LazyOrMap} and \texttt{LazyComplementMap}.
 	\end{itemize}
 	
-	\item \texttt{Solver} The solver should be capable of providing basic constants and performing standard operations such as: Tautology, contradiction, conjunction, disjunction, complement (negation), test for emptiness (satisfiability) and formula simplification. These operations are then used to implement more complex, algorithm specific operations (Such as the $\Leftarrow$ introduced in section TODO[assumptions]). User is also free to override these default implementations assuming a more efficient alternative is available. Finally, each parameter representation must also be serializable into a byte buffer so that it can be safely transferred between fragments.
+	\item \texttt{Solver} The solver should be capable of providing basic constants ($\ttrue, \ffalse$) and performing standard operations such as: Conjunction, disjunction, complement (negation), test for emptiness (satisfiability) and formula simplification. These operations are then used to implement more complex, algorithm specific operations (for example the $\Leftarrow$ introduced in section TODO[assumptions]). User is also free to override these default implementations assuming a more efficient alternative is available. Finally, each solver should be able to serialize a parameter constraint into a byte buffer so that it can be safely transferred between fragments.
 	
-	Additionally, the module provides sample solvers based on standard collections. These usually don't scale very well with increasing number of parameter valuations, but provide a good starting point for implementing and debugging more complex solvers:
+	Additionally, the module provides sample explicit solvers based on standard collections. These usually don't scale very well with increasing number of parameter valuations, but provide a good starting point for implementing and debugging more complex solvers:
 	
 	\begin{itemize}
 		\item \texttt{BoolSolver} Basic solver for models without parameters.
 		\item \texttt{IntSetSolver} Solver which expects a set of parameter valuations that can be mapped to unique integers.
-		\item \texttt{BitSetSolver} Much faster variant of \texttt{IntSetSolver}, which additionally requires the parameter valuation identifiers to be consecutive integers (so that they can be inserted into a standard bit set).
+		\item \texttt{BitSetSolver} Much faster variant of \texttt{IntSetSolver} which additionally requires the parameter valuation identifiers to be consecutive integers (so that they can be inserted into a standard bit set).
 	\end{itemize}
 	
 	\item \texttt{Partition} Combining the \ac{PDTS} fragment with its the partition function, the \texttt{Partition} interface provides the total amount of fragments, current fragment identifier, methods for obtaining predecessors and successors of a specific state plus the ability to evaluate atomic propositions.
@@ -59,15 +63,47 @@ Now that we have described how the parameter synthesis module approaches states 
 	
 	\begin{itemize}
 		\item \texttt{SingletonPartition} Partition function which maps all states to a single fragment. Useful for debugging or working in single threaded environment.
-		\item \texttt{HashPartition} Partition which assigns states to predefined number of fragments using an integer modulus as a hash function. It usually provides good levels of uniformity and concurrency, however, traditionally also requires a lot of communication.
-		\item \texttt{UniformPartition} A uniform partition divides the states into equally sized intervals and assigns each fragment one interval. It provides uniformity and assuming the identifiers of state neighbours are also numerically close to the identifier of the original state, it should also provide low communication overhead. However, in cases when the communication cost is low, the better concurrency of the \texttt{HashPartition} can result in faster computation.
-		\item \texttt{BlockPartition} A block partition is hybrid between \texttt{UniformPartition} and \texttt{HashPartition}. The partition function will divide the state space into equally sized intervals, while each fragment is assigned a predefined number of intervals.
+		\item \texttt{HashPartition} Partition which assigns states to predefined number of fragments using an integer modulus as a hash function. It provides good levels of uniformity and concurrency, however, usually also requires a lot of communication.
+		\item \texttt{UniformPartition} A uniform partition divides the states into equally sized intervals and assigns each fragment one interval. It provides good uniformity and assuming the identifiers of state neighbours are also numerically close to the identifier of the original state, it should provide low communication overhead. However, in cases when the communication cost is low, the better concurrency of the \texttt{HashPartition} can result in faster computation.
+		\item \texttt{BlockPartition} A block partition is a hybrid between the \texttt{UniformPartition} and the \texttt{HashPartition}. The partition function will divide the state space into equally sized intervals, while each fragment is assigned a predefined number of intervals.
 	\end{itemize}
 
 	Apart from the predefined partitions, the parameter synthesis module also provides a very basic explicit model implementation, which can be useful for debugging, testing and creating toy examples (it is used as a model implementation for the validity testing).
 
-	\item 
+	\item \texttt{Channel} Responsible for communication between fragments, functionality of \texttt{Channel} maps almost directly to the \textsc{Communicate} procedure in the algorithm pseudocode. The communication relies on serialization into byte buffers.
+	
+	The module provides two basic implementations:
+	
+	\begin{itemize}
+		\item \texttt{SingletonChannel} Channel used for single threaded workloads with no ability to communicate.
+		\item \texttt{SharedMemChannel} Channel which directly passes the byte buffers between fragments managed by the same virtual machine.
+	\end{itemize}
+
+	As you can see, no truly distributed channel is provided directly by the module. Users should provide their own channel based on the distributed environment where the algorithm is running.
+
 \end{itemize}
+
+\subsection{Module work flow}
+
+\begin{figure}[]
+	\centering
+	\includegraphics[scale=0.45]{core_workflow.pdf}
+	\caption{Work flow of the main parameter synthesis module. Circles represent \ac{HUCTLp} properties, diamonds \texttt{StateMap}s. }
+	\label{fig:core_workflow}
+\end{figure}
+
+With all necessary data structures in place, the parameter synthesis engine accepts a set of investigated \ac{HUCTLp} properties and is ready to perform the main procedure. The work flow is depicted in figure \ref{fig:core_workflow}.
+
+The implementation starts by constructing a dependency graph based on the provided \ac{HUCTLp} properties. Each node in the graph is represented by a special operator object which implements the logic of the semantic function $\mathcal{C}$ for one specific \ac{HUCTLp} operator. 
+
+This construction ensures that whenever two properties share a common sub-formula, it is only computed once. Furthermore, this construction also unrolls the state variable valuation, so that for example a property $\hctlAt{x} \varphi$ is represented as $|\dtsS|$ distinct operators, depending on the value of $x$. 
+
+
+This allows us to ensure that unused valuations don't create unnecessary operators. A good example of such case is a formula $\hctlBind{x} \ctlA\ctlF (\neg x \land \ctlE\ctlF p)$ where $p$ is some atomic proposition. In this case, $\ctlE\ctlF$ is independent on the valuation of $x$, and therefore can be represented by a single operator node in the dependency graph, while the $\ctlA\ctlF$ is unrolled into multiple operators depending on the value of $x$.
+
+Another important optimisation this construction allows is canonisation of the state variable names. This means that if you consider a formula such as $[\hctlBind{x} \ctlA\ctlF x] \lor [\hctlExists{y} (\ctlA \ctlF y \land \neg y)]$, both $\ctlA\ctlF x$ and $\ctlA\ctlF y$ are resolved as the same operator object and are computed only once. 
+
+After the operator dependency graph is constructed, the fixed point algorithm starts to iteratively process operators in the graph, starting from the smallest (propositions). We always process only one operator at a time, even though this reduces the potential for parallelism. One reason for this is to avoid unnecessary propagation of incomplete results (when a sub-formula of $\ctlE\ctlF$ is updated, this can potentially trigger update in the whole system). Second reason is to reduce the memory requirements. When you only process one operator at a time, you can quickly discard results that are no longer needed, keeping the memory consumption polynomial instead of exponential in the size of the state space (of course, the operator graph can still be exponential, however, we assume that inactive operators can be represented very compactly, as opposed to the actual assumption functions).  
 
 \section{ODE Model Module}
 
