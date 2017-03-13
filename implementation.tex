@@ -87,8 +87,8 @@ Now that we have described how the parameter synthesis module approaches states 
 
 \begin{figure}[]
 	\centering
-	\includegraphics[scale=0.45]{core_workflow.pdf}
-	\caption{Work flow of the main parameter synthesis module. Circles represent \ac{HUCTLp} properties, diamonds \texttt{StateMap}s. }
+	\includegraphics[scale=0.45]{media/core_workflow.pdf}
+	\caption{Work flow of the main parameter synthesis module. Circles represent \ac{HUCTLp} operator objects, diamonds \texttt{StateMap}s. }
 	\label{fig:core_workflow}
 \end{figure}
 
@@ -103,10 +103,50 @@ This allows us to ensure that unused valuations don't create unnecessary operato
 
 Another important optimisation this construction allows is canonisation of the state variable names. This means that if you consider a formula such as $[\hctlBind{x} \ctlA\ctlF x] \lor [\hctlExists{y} (\ctlA \ctlF y \land \neg y)]$, both $\ctlA\ctlF x$ and $\ctlA\ctlF y$ are resolved as the same operator object and are computed only once. 
 
-After the operator dependency graph is constructed, the fixed point algorithm starts to iteratively process operators in the graph, starting from the smallest (propositions). We always process only one operator at a time, even though this reduces the potential for parallelism. One reason for this is to avoid unnecessary propagation of incomplete results (when a sub-formula of $\ctlE\ctlF$ is updated, this can potentially trigger update in the whole system). Second reason is to reduce the memory requirements. When you only process one operator at a time, you can quickly discard results that are no longer needed, keeping the memory consumption polynomial instead of exponential in the size of the state space (of course, the operator graph can still be exponential, however, we assume that inactive operators can be represented very compactly, as opposed to the actual assumption functions).  
+After the operator dependency graph is constructed, the fixed point algorithm iteratively processes operators in the graph, starting from the smallest (propositions). We always process only one operator at a time, even though this reduces the potential for parallelism. One reason for this is to avoid unnecessary propagation of incomplete results (when a sub-formula of $\ctlE\ctlF$ is updated, this can potentially trigger update in the whole system). Second reason is to reduce the memory requirements. When you only process one operator at a time, you can quickly discard results that are no longer needed, keeping the memory consumption polynomial instead of exponential in the size of the state space (of course, the operator graph can still be exponential, however, we assume that pending operators can be represented very compactly, as opposed to the actual assumption functions).  
+
+As a result of this operation, user obtains a set of \texttt{StateMap}s which represent the parameter synthesis result for the local states of the fragment for each requested property, as depicted in the third part of the work flow figure.
 
 \section{ODE Model Module}
 
 
+\begin{figure}[]
+	\centering
+	\includegraphics[scale=0.45]{media/ode_workflow.pdf}
+	\caption{Work flow of the ode module module. The usage of a specific fragment implementation depends on the properties of the model. }
+	\label{fig:ode_workflow}
+\end{figure}
 
-\section{CLI Front-end}
+The ODE model module provides implementations for working with various types of models based on ordinary differential equations. The models are originally represented using a .bio model format (grammar provided in ANTLR4 syntax in Appendix [TODO]) and this module is responsible for parsing the model file, computing the piecewise linear approximation and transforming the model into \ac{PDTS} fragments that can be then used by the main parameter synthesis module. The module also provides appropriate solvers for the supported model types.	
+
+The work flow of this process, with all of it's main components is depicted in figure \ref{fig:ode_workflow}. After the piecewise linear approximation is constructed, the model is analysed for relationships between parameters and an appropriate parameter representation is chosen.
+
+\texttt{Rectangular Model} and the corresponding \texttt{Rectangular Solver} are chosen when the parameters are fully independent (at most one parameter per equation). This type of parameter representation uses a set of hyper-rectangles to encode the parameter constrain and is fairly straightforward and efficient.
+
+\texttt{Z3 Model} and \texttt{Z3 Solver} are then used for more complex models. In this case, the parameter constrains are represented directly as Microsoft Z3 compatible formulae and the SMT solver is directly responsible for deciding satisfiability and formula simplification. This is facilitated by directly interfacing with a Z3 process running in interactive mode. Z3 also provides a direct API for common programming languages. However, we choose not to use this, because it causes problems with parallelism on multi-core machines. 
+
+At the time of writing, Z3 was designed in a way that even for formulae which belong to completely separate contexts, some non-trivial synchronisation is performed. This synchronisation then significantly cripples the parallel execution to a point where adding more concurrent workers actually slows down the execution significantly. Having a set of independent (at the system level) solver processes then enables us to scale the execution on multi-core machines, even though it introduces more overhead and complexity to the whole program.
+
+Finally, this module also provides an \texttt{Abstract Model} class which implements general logic for generating transitions in ODE based models. One can use this class to quickly implement new model variants. All that needs to be provided is a method producing a parameter constrain under which is a given equation at a given vertex positive or negative (corresponding to a positive or negative derivation). Other logic and optimisations (caching, etc.) is then handled solely by the abstract implementation. Naturally, an appropriate solver also has to be provided.
+
+\section{Command line frontend}
+
+\begin{figure}[]
+	\centering
+	\includegraphics[scale=0.9]{media/cli_workflow.pdf}
+	\caption{Work flow of the command line frontend. }
+	\label{fig:cli_workflow}
+\end{figure}
+
+The command line frontend connects all these modules into one package with a well defined input and output. Schematic description of this module is given in Figure \ref{fig:cli_workflow}.
+
+The process starts by parsing given input files and creating $N$ independent partitions connected using a shared memory communication channel. These data structures are then passed into the parameter synthesis engine, which is described in Section TODO.
+
+As soon as the parameter synthesis is finished, the frontend module obtains $N$ partial results from the synthesis engine. These partial results are then merged into one general result set. Finally, the result set can be exported using two supported output formats. First format provides export into a machine readable .json file, suitable for further post-processing or visualisations. Second format provides a more human readable text format, which can be useful when debugging or working with simple models.
+
+The actual content of both formats depends on the type of parameter representation used by the model. When working with hyper-rectangular parameter representation, a parameter constrain is represented using a suitable multi dimensional array interpreted directly as a set of hyper-rectangles. On the other hand, when working with the pure SMT approach, a parameter constrain is represented as a SMT-LIB 2 formula [TODO CITE].
+
+Finally, a set of diagnostic and benchmarking data is collected during the computation. These include the amount and frequency of data transfers between partitions (to monitor possible communication bottlenecks) and the average solver throughput (corresponds to the complexity of parameter constrains which were encountered during the computation). These data are generally printed directly to the standard output or can be easily redirected into a separate file.
+
+For a detailed description of the command line arguments accepted by the frontend module, see Appendix TODO. Appendix TODO then provides a schematic description of the .json output format for machine processing.
+

@@ -131,3 +131,6 @@ sympy-plots-for-*.tex/
 
 # Ignore outputs
 # *.pdf
+
+# Ignore main output
+main.pdf
