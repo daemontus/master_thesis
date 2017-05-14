@@ -1,0 +1,38 @@
+Before we dive into the technical details of this work, let us briefly describe the context and motivation behind it.
+
+\subsubsection{\textbf{Dynamical systems}}
+
+As countless examples from biology, physics and economy suggest, interesting, naturally occurring phenomena are often extremely hard, even impossible, to study \emph{computationally}. This is usually due to a huge amount of information involved, or the nature of the phenomenon itself (e.g. quantum mechanics). In order to study such phenomena, science often resorts to using models, which omit unnecessary details of the physical reality and focus only on the minimal representation needed to encode the interesting dynamics.
+
+One of such modelling techniques are \emph{dynamical systems}, which employ the framework of \emph{ordinary differential equations} to describe the dynamics of physical phenomena. In order to study such models exactly, one usually relies on techniques from the field of mathematical analysis. However, these are often intractable due to the sheer complexity of the differential equations involved. In such cases, one often needs to resort to simulation or various types of visualisations.
+
+\subsubsection{\textbf{Parameter synthesis}}
+
+When dealing with models, especially dynamical systems, one often has to consider a significant amount of \emph{uncertainty}, usually represented using parameters which influence the systems dynamics. The uncertainty can arise under different circumstances. For example unintentionally, due to the physical properties of the system (e.g. properties which are hard to measure experimentally) or it can be intentional, due to the design of the system (e.g. initial conditions which are controlled by the scientist). However, no matter what is the reason for the uncertainty, it always complicates the study of the model. Even simulation and visualisation can be intractable when high amount of uncertainty is involved. 
+
+In such systems, we talk about a \emph{parameter synthesis} problem. That is, given a desired property, determine all parameter valuations under which the system satisfies the property. For example, given a model of a cell with an ambient temperature as a parameter, determine under which circumstances is the cell able to reproduce. Closely related to this problem is also the problem of \emph{bifurcation analysis}. The goal of bifurcation analysis is to partition the parameter space into regions where parameters do not qualitatively change the behaviour of the system.
+
+\subsubsection{\textbf{Temporal logic}}
+
+Before solving the parameter synthesis problem, one needs to first provide a formal description of the desired property. Creating such specification can be often an error prone task. To make this process more intuitive, one usually specifies the desired properties using some suitable \emph{temporal logic}. Temporal logic is a special case of \emph{modal logic} where the modality is used to represent the flow of time.
+
+Most common temporal logics include \acf{LTL} and \acf{CTL}, where \ac{LTL} uses the notion of linear time, whereas \ac{CTL} uses branching time. In general, \ac{LTL} is therefore more suitable for reasoning about deterministic systems, while \ac{CTL} is applicable to non-deterministic ones. Various extensions and modifications of these temporal logics exists. In this work, we introduce and employ a hybrid extension of the UCTL logic [CITATION], the \acf{HUCTLp}, as our framework for specifying model properties.
+
+\subsubsection{\textbf{Model checking}}
+
+To solve the parameter synthesis problem for dynamical systems with properties specified using \ac{HUCTLp} logic, we introduce an algorithm based on the well known \emph{model checking} technique. Model checking is an exhaustive technique which can be used to verify whether the given system satisfies some specification. It is a well studied framework for often used for software and hardware verification.
+
+In this work, we introduce a distributed algorithm for model checking of systems with parameters. To cope with the parameter uncertainty, we use the coloured approach [CITE], which enables us to consider multiple parameter valuations with equivalent local behaviour at the same time, thus reducing the average computation time.
+
+\subsubsection{\textbf{Overview}}
+ 
+First, in the Preliminaries (Chapter \ref{chap:preliminaries}), we formally define \ac{HUCTLp} and its semantics over direction transition systems and several other notions needed to describe the distributed algorithm. In Chapter \ref{chap:algorithm}, we describe the parameter synthesis procedure, which is based on a fixed point assumption function. Then, in the Implementation (Chapter \ref{chap:implementation}), we discuss the implementation of the algorithm, provided as part of the Pithya parameter synthesis tool. Finally, in Chapter \ref{chap:evaluation}, we present an evaluation of our implementation in terms of performance and a small case study showing the applicability of our method. 
+
+%- physical world is hard
+%- models
+%- dynamical systems
+%- parameters
+%- parameter synthesis
+%- fitting / sampling
+%- model checking
+%- Need for HUCTLp
