@@ -1,33 +1,38 @@
+In this chapter, we introduce the basic notions used throughout the thesis together with their more intuitive explanations.
+
 \section{\Acl{DTS}}
 
-A \emph{\acl{DTS}} (\acs{DTS}) is a tuple $\dtsTuple$, where:
-
-\begin{itemize}
-	\item $\dtsS$ is a set of states;
-	\item $\dtsDir$ is a finite non-empty set of \emph{directions};
-	\item $\dtsT \subseteq \dtsS \times \dtsDir \times \dtsS$ is the transition relation satisfying the following conditions:
+\begin{definition}
+	A \emph{\acl{DTS}} (\acs{DTS}) is a tuple $\dtsTuple$, where:
+	
 	\begin{itemize}
-		\item[--] $\dtsT$ is \emph{total}, i.e.~for each $s$ there are $s'$ and $d$ such that $(s, d,
-		s')\in \dtsT$,
-		\item[--] $\dtsT$ is \emph{past-total}, i.e.~for each $s$ there are $s'$ and $d$ such that
-		$(s', d, s)\in \dtsT$,
-		\item[--] for each $s \ne s'$ there is at most one $d$ such that $(s, d, s')\in \dtsT$,
-		\item[--] for each $s$ either there is no $d$ such that $(s,d,s) \in \dtsT$ or
-		for all $d \in \dtsDir: (s,d,s) \in \dtsT$;
+		\item $\dtsS$ is a non-empty set of \emph{states};
+		\item $\dtsDir$ is a finite non-empty set of \emph{directions};
+		\item $\dtsT \subseteq \dtsS \times \dtsDir \times \dtsS$ is the \emph{transition relation} satisfying the following conditions:
+		\begin{itemize}
+			\item[--] $\dtsT$ is \emph{total}, that is, for each $s$ there is some $s'$ and $d$ such that $(s, d,
+			s')\in \dtsT$;
+			\item[--] $\dtsT$ is \emph{past-total}, that is, for each $s$ there is some $s'$ and $d$ such that
+			$(s', d, s)\in \dtsT$;
+			\item[--] for each $s \ne s'$ there is at most one $d$ such that $(s, d, s')\in \dtsT$;
+			\item[--] for each $s$ there is either no $d$ such that $(s,d,s) \in \dtsT$ or
+			for all $d \in \dtsDir: (s,d,s) \in \dtsT$;
+		\end{itemize}
+		\item $\dtsAP$ is a set of atomic propositions;
+		\item $L : \dtsS \rightarrow 2^\dtsAP$ is a labelling function that associates a subset of $\dtsAP$ to each state.
 	\end{itemize}
-	\item $\dtsAP$ is a set of atomic propositions;
-	\item $L : \dtsS \rightarrow 2^\dtsAP$ is a labelling function that associates a subset of $\dtsAP$ to each state.
-\end{itemize}
+	
+\end{definition}
 
-We will use the notation $\tD{s}{t}$ to denote the set of all directions between two states: $\tD{s}{t} = \{ d \in \dtsDir \mid (s, d, t) \in \dtsT \}$ (Note that this set either contains just one element or all elements of $\dtsDir$).
+A \ac{DTS} is an extension of the standard notion of \emph{transition systems} which adds to each transition also a direction label. Furthermore, aside from the standard requirement of totality, transition relation also has to be past-total, which allows us to reason about both future and past runs of such system.
 
-We will also use $s \dtsTransition{d} s'$ to denote $(s, d, s') \in \dtsT$ and $s \tsTransition s'$ if there exists $d \in \dtsDir$ such that $s \dtsTransition{d} s'$.
+Note that the self-loops in a \ac{DTS} are not distinguishable from the direction standpoint, meaning there is no $loop$ direction. Instead, the self-loop is labelled with all directions, which intuitively means that the system can move in any direction, but the perturbation is not strong enough to modify the overall state of the system.
 
-Intuitively ...
+We use the notation $\tD{s}{t}$ to denote the set of all directions between two states: $\tD{s}{t} = \{ d \in \dtsDir \mid (s, d, t) \in \dtsT \}$ (Note that this is either a singleton set, or the whole $\dtsDir$). We will also use $s \dtsTransition{d} s'$ to denote $(s, d, s') \in \dtsT$ and $s \tsTransition s'$ if there exists $d \in \dtsDir$ such that $s \dtsTransition{d} s'$.
 
 \section{Time flow and runs in \ac{DTS}}
 
-In this work, we consider two possible semantics of a \ac{DTS}: past and future. Collectively, we refer to these as time flow. We will use prefix $\future$ to denote context where we consider the future semantics and $\past$ to denote context where the past semantics is considered. We also assume that the time flow can be negated, meaning $\withTime{\neg}\future \equiv \past$ and $\withTime{\neg}\past \equiv \future$.
+In this work, we consider two possible semantics of a \ac{DTS}: past and future. Collectively, we refer to these as time flow. We use a $\future$ prefix to denote a context where we consider the future semantics and $\past$ to denote a context where the past semantics is considered. We also assume that the time flow can be negated, meaning $\withTime{\neg}\future \equiv \past$ and $\withTime{\neg}\past \equiv \future$.
 
 Let $M = \dtsTuple$ be a \ac{DTS}. In accordance with the above specified notation, we define the \emph{future transition relation} as $\future\dtsT = \dtsT$ and \emph{past transition relation} as $\past\dtsT = \{ (s', d, s) \mid (s, d, s') \in \future{\dtsT} \}$. Note that since $T$ is both total and past-total, both $\future\dtsT$ and $\past\dtsT$ are total.
 
@@ -35,27 +40,29 @@ Let $t$ be one of $\future{}$ and $\past{}$. Then:
 
 \begin{itemize}
 	\item A \emph{run} $\withTime{t}\pi$ is an infinite sequence $s_0, d_0, s_1, d_1, s_2, \ldots$ such that $(s_i, d_{i}, s_{i+1}) \in \withTime{t}\dtsT$ for all $i$. If the time flow of the run is clear from context, we can omit the $\withTime{t}$ prefix;
-	\item $\withTime{t}\pi_\dtsS(i)$ denotes $i$th state $s_i$ and $\withTime{t}\pi_\dtsDir(i)$ denotes $i$th direction $d_i$ of the run $\withTime{t}\pi$;
-	\item $\withTime{t}\Pi_M$ denotes the set of all possible runs of the \ac{DTS} $M$;
-	\item Function $\withTime{t}runs_M : \dtsS \rightarrow 2^{\withTime{t}\Pi_M}$ computes all runs originating in the given state: $\withTime{t}runs_M(s) = \{ \pi \in \withTime{t}\Pi_M \mid \pi_\dtsS(0) = s\}$;
-	\item Function $\withTime{t}succ_M : \dtsS \rightarrow 2^{\dtsDir \times \dtsS}$ computes the successors of the given state:
+	\item $\withTime{t}\pi_\dtsS(i)$ denotes the $i$-th state $s_i$ and $\withTime{t}\pi_\dtsDir(i)$ denotes the $i$-th direction $d_i$ of the run $\withTime{t}\pi$;
+	\item $\withTime{t}\Pi_M$ denotes the set of all $t$-runs of the \ac{DTS} $M$;
+	\item Function $\withTime{t}runs_M : \dtsS \rightarrow \mathcal{P}(\withTime{t}\Pi_M)$ computes all runs originating in the given state: $\withTime{t}runs_M(s) = \{ \pi \in \withTime{t}\Pi_M \mid \pi_\dtsS(0) = s\}$;
+	\item Function $\withTime{t}succ_M : \dtsS \rightarrow \mathcal{P}(\dtsDir \times \dtsS)$ computes the successors of the given state (with respect to time flow $t$):
 	$\withTime{t}succ_M(s) = \{ (d, s') \in \dtsDir \times \dtsS \mid (s,d,s') \in \withTime{t} \dtsT \}$;
-	\item Function $\withTime{t}pred_M : \dtsS \rightarrow 2^{\dtsDir \times \dtsS}$ computes the predecessors of the given state:
-	$\withTime{t}pred_M(s) = \withTime{\neg t}succ_M(s)$;
+	\item Similarly, function $\withTime{t}pred_M : \dtsS \rightarrow \mathcal{P}(\dtsDir \times \dtsS)$ computes the predecessors of the given state: $\withTime{t}pred_M(s) = \withTime{\neg t}succ_M(s)$;
 \end{itemize}
 
-Whenever is the \ac{DTS} $M$ clear from context, we can omit the subscript $M$.
+Whenever the \ac{DTS} $M$ is clear from context, we can omit the subscript $M$.
+
+Compared to the standard transition systems, we incorporate the notion of direction into a run by representing it as an alternating sequence of states and directions. Notice that each run always starts in a state. Everything is then parametrised by the notion of time flows.
 
 \section{Direction formulae}
 
 To reason about a direction of a specific transition, we define the language of direction formulae.
 
-Let $\dtsDir$ be a set of directions. The language of direction formulae is then defined as follows:
-
-\[
+\begin{definition}
+	Let $\dtsDir$ be a set of directions. The language of direction formulae is then defined as follows:
+	
+	\[
 	\chi ::= \true \mid d \mid \neg\chi \mid \chi\wedge\chi
-\]
-
+	\]
+\end{definition}
 For a direction $\hat d$ is the satisfaction relation $\models$ then defined as follows:
 
 \begin{alignat*}{4}
@@ -65,15 +72,18 @@ For a direction $\hat d$ is the satisfaction relation $\models$ then defined as 
 	\hat d &\models \chi_1 \land \chi_2 	 &&\iff \hat d\models\chi_1 \text{ and } \hat d\models\chi_2
 \end{alignat*}
 
+Intuitively, a direction formula is just a standard Boolean formula with directions as propositions.
+
 \section{\Acl{HUCTLp}}
 
 To reason about a \ac{DTS}, we define the following \ac{HUCTLp} logic.
 
 \subsection{Syntax}
 
-Let $p$ be an atomic proposition from the $\dtsAP$ set, $d$ a direction formula over $\dtsDir$,  $t$ one of the time flows ($\future{}$ or $\past{}$), and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
-
-\begin{align*}
+\begin{definition}
+	Let $p$ be an atomic proposition from the $\dtsAP$ set, $d$ a direction formula over $\dtsDir$,  $t$ one of the time flows ($\future{}$ or $\past{}$), and $x$ a state variable. The language of \ac{HUCTLp} formulae is then defined as follows:
+	
+	\begin{align*}
 	\varphi 	&::= 	\true 
 	\mid p 
 	\mid x 
@@ -92,17 +102,21 @@ Let $p$ be an atomic proposition from the $\dtsAP$ set, $d$ a direction formula 
 	\varphi \dctlWl{\chi} \varphi \mid
 	\varphi \dctlWlr{\chi}{\chi} \varphi
 	\\
-\end{align*}
+	\end{align*}
+	
+\end{definition}
 
 We call all $\varphi$ formulae \emph{state formulae} and all $\psi$ formulae $\psi$ \emph{path formulae}. We write $cl(\varphi)$ to denote the set of all sub-formulae of $\varphi$.
 
-\textbf{?}Note that in situations where the aspect of time flow is irrelevant (i.e. when the statement holds for both the past and the future), we can omit the time flow prefix.
+The temporal operators follow the common naming scheme based on \ac{CTL} ($\ctlX$ - next, $\ctlU$ - until, $\ctlW$ - weak until), but we also introduce new operators, namely $\hctlAt{x} \varphi$, pronounced "at", $\hctlBind{x} \varphi$, pronounced "bind" and $\hctlExists{x} \varphi$, pronounced "exists".
+
+Note that in situations where the aspect of time flow is irrelevant (i.e. when the statement holds for both past and future), we can omit the time flow prefix.
 
 \subsection{Semantics}
 
 In order to describe semantics of the \ac{HUCTLp} as a whole, we will define the semantics of the state and path formulae separately. The model of a state formula over \ac{DTS} $M$ is a state $s$ while the model of a path formula is a run $\pi$. Furthermore, each model is extended with a partial function $h : \var \to \dtsS$, which represents the valuation of the state variables.
 
-We write $h_0$ to denote an empty valuation and $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to state $s$ but is otherwise defined as valuation $h$, formally:
+We write $h_0$ to denote an empty valuation and $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to a state $s$ but is otherwise defined as valuation $h$, formally:
 
 \[
 	h[x \mapsto s](x') = \begin{cases}
@@ -111,9 +125,9 @@ We write $h_0$ to denote an empty valuation and $h[x \mapsto s]$ to denote a val
 	\end{cases}
 \]
 
-Let $M = \dtsTuple$ be a \ac{DTS} and $h : \var \to \dtsS$ a valuation of state variables. The satisfaction relation for states of $M$ with respect to a state \ac{HUCTLp} formulae is defined as follows:
-
-\begin{alignat*}{2}
+\begin{figure}
+	
+	\begin{alignat*}{2}
 	(M,h,s) &\models \true	\\
 	(M,h,s) &\models p										   && \iff p \in \dtsL(s) \\
 	(M,h,s) &\models x										   && \iff h(x) = s \\
@@ -124,21 +138,39 @@ Let $M = \dtsTuple$ be a \ac{DTS} and $h : \var \to \dtsS$ a valuation of state 
 	(M,h,s) &\models \varphi_1 \land \varphi_2 	   && \iff (M,h,s) \models \varphi_1 \text{ and } (M,h,s) \models \varphi_2  \\
 	(M,h,s) &\models \withTime{t}\ctlE \psi 			 && \iff \exists \pi \in \withTime{t}runs : (M,h,\pi) \models \psi \\
 	(M,h,s) &\models \withTime{t}\ctlA \psi 			 && \iff \forall \pi \in \withTime{t}runs : (M,h,\pi) \models \psi \\	
-\end{alignat*}
+	\end{alignat*}
+	
+	\caption{Semantics of \ac{HUCTLp} state formulae. Let $M = \dtsTuple$ be a \ac{DTS} and $h : \var \to \dtsS$ a valuation of state variables.}
+	\label{fig:semState}
+\end{figure}
 
-The satisfaction relation for runs of $M$ with respect to a path \ac{HUCTLp} formulae is defined as follows:
+The satisfaction relation for states of a \ac{DTS} $M$ with respect to a \ac{HUCTLp} state formula is defined in Figure \ref{fig:semState}
 
-\begin{alignat*}{2}
-	(M,h,\pi) &\models \dctlX{\chi} \varphi								& \iff & \pi_\dtsDir(0) \models \chi \text{ and } (M, h, \pi_\dtsS(1)) \models \varphi \\
-	(M,h,\pi) &\models \varphi_1 \dctlUl{\chi} \varphi_2		  & \iff & \exists i : \pi_\dtsS(i) \models \varphi_2 \text{ and } \\
-				  &																		 & 		 & \forall j < i : \pi_\dtsS(j) \models \varphi_1 \land \pi_\dtsDir(j) \models \chi \\
-	(M,h,\pi) &\models \varphi_1 \dctlUlr{\chi}{\xi} \varphi_2 	 & \iff & \exists i > 0 : \pi_\dtsS(i) \models \varphi_2 \land \pi_\dtsS(i-1) \models \varphi_1 \land \pi_\dtsDir(i-1) \models \xi  \text{ and } \\
-				  & 																	  & 	 & \forall j < i - 1 : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(j) \models \chi \\
-	(M,h,\pi) &\models \varphi_1 \dctlWl{\chi} \varphi_2		  & \iff & (M,h,\pi) \models \varphi_1 \dctlUl{\chi} \varphi_2 \text{ or } \\
-				  &																		 & 		 & \forall i : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(i) \models \chi \\
-	(M,h,\pi) &\models \varphi_1 \dctlWlr{\chi}{\xi} \varphi_2		  & \iff & (M,h,\pi) \models \varphi_1 \dctlUlr{\chi}{\xi} \varphi_2 \text{ or } \\
-&																		 & 		 & \forall i : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(i) \models \chi \\
-\end{alignat*}
+Compared to \ac{CTL}, we can see that the path operators $\ctlA$ and $\ctlE$ are extended with the notion of time flow. Also, the semantics of $\hctlExists{x} \phi$ follow directly from first-order logic. 
+
+The most interesting are the remaining operators: \emph{bind} and \emph{at}. Intuitively, \emph{bind} provides a more "specialised" alternative to \emph{exists}, while \emph{at} allows effect similar to memory access, allowing us to check property in a previously saved state (in some parent formula).
+
+\begin{figure}
+		\begin{alignat*}{2}
+		(M,h,\pi) &\models \dctlX{\chi} \varphi								& \iff & \pi_\dtsDir(0) \models \chi \text{ and } (M, h, \pi_\dtsS(1)) \models \varphi \\
+		(M,h,\pi) &\models \varphi_1 \dctlUl{\chi} \varphi_2		  & \iff & \exists i : \pi_\dtsS(i) \models \varphi_2 \text{ and } \\
+		&																		 & 		 & \forall j < i : \pi_\dtsS(j) \models \varphi_1 \land \pi_\dtsDir(j) \models \chi \\
+		(M,h,\pi) &\models \varphi_1 \dctlUlr{\chi}{\xi} \varphi_2 	 & \iff & \exists i > 0 : \pi_\dtsS(i) \models \varphi_2 \text{ and } \\
+		&																		  & 	 & \pi_\dtsS(i-1) \models \varphi_1 \land \pi_\dtsDir(i-1) \models \xi  \text{ and } \\
+		& 																	  & 	 & \forall j < i - 1 : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(j) \models \chi \\
+		(M,h,\pi) &\models \varphi_1 \dctlWl{\chi} \varphi_2		  & \iff & (M,h,\pi) \models \varphi_1 \dctlUl{\chi} \varphi_2 \text{ or } \\
+		&																		 & 		 & \forall i : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(i) \models \chi \\
+		(M,h,\pi) &\models \varphi_1 \dctlWlr{\chi}{\xi} \varphi_2		  & \iff & (M,h,\pi) \models \varphi_1 \dctlUlr{\chi}{\xi} \varphi_2 \text{ or } \\
+		&																		 & 		 & \forall i : \pi_\dtsS(i) \models \varphi_1 \land \pi_\dtsDir(i) \models \chi \\
+		\end{alignat*}
+		
+		\caption{Semantics of \ac{HUCTLp} path formulae. Let $M = \dtsTuple$ be a \ac{DTS} and $h : \var \to \dtsS$ a valuation of state variables.}
+	\label{fig:semPath}
+\end{figure}
+
+The satisfaction relation for runs of $M$ with respect to a \ac{HUCTLp} path formula is defined in Figure \ref{fig:semPath}.
+
+As we can see, the semantics of path formulae are very similar to the standard \ac{CTL}. However, the operators are extended with the notion of directions, effectively restricting the set of runs considered when deciding the satisfaction of the property.
 
 \subsection{Other operators}
 
@@ -151,7 +183,7 @@ First, we define directed extensions of the standard \ac{CTL} $\ctlF$ and $\ctlG
 	\dctlG{\chi} \varphi 				& \equiv \varphi \dctlWl{\chi} false \\
 \end{align*}
 
-Further discussion of these operators and their relationship with their \ac{CTL} counterparts is provided in subsection \ref{sec:weak}.
+Further discussion of these operators and their relationship with their \ac{CTL} counterparts is provided in Subsection \ref{sec:weak}.
 
 Second, we define other operators commonly used in first order logic:
 
@@ -207,9 +239,9 @@ To understand why these equivalences do not hold, let us explore in detail the c
 			& \iff \exists \pi \in \withTime{t}runs  : \pi_\dtsDir(0) \models \chi \land (M, h, \pi_\dtsS(1)) \models \varphi \\
 \end{align*}
 
-First, let us observe that if $\chi = true$, both definitions are obviously equivalent. However, as we can see, the original $\withTime{t}\ctlE\dctlX{\chi}$ operator intuitively states that there \emph{exists a $t$-run where first direction models $\chi$ and the next state models $\varphi$}, hence there really must exists such run. On the other hand, the expression $\neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi$ translates to a slightly different statement. Intuitively, $\neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi$ states that there \emph{exists a $t$-run where if the first direction models $\chi$, the next state models $\varphi$}. Therefore this formula is satisfied not only when $\withTime{t}\ctlE\dctlX{\chi}$ is satisfied, but also when there is a run which does not start with a direction satisfying $\chi$.
+First, let us observe that if $\chi = true$, both definitions are obviously equivalent. However, as we can see, the original $\withTime{t}\ctlE\dctlX{\chi}$ operator intuitively states, that there \emph{exists a $t$-run where first direction models $\chi$ and the next state models $\varphi$}, hence there really must exists such run. On the other hand, the expression $\neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi$ translates to a slightly different statement. Intuitively, $\neg \withTime{t}\ctlA\dctlX{\chi} \neg \varphi$ states that there \emph{exists a $t$-run where if the first direction models $\chi$, the next state models $\varphi$}. Therefore this formula is satisfied not only when $\withTime{t}\ctlE\dctlX{\chi}$ is satisfied, but also when there is a run which does not start with a direction satisfying $\chi$.
 
-Similarly, in case of $\neg \withTime{t}\ctlE\dctlX{\chi} \neg \varphi$, we get an intuitive meaning \emph{if the first direction of a $t$-run models $\chi$, the next state models $\varphi$}. Compare this to the meaning of $\withTime{t}\ctlA\dctlX{\chi}$, which states that \emph{the first direction of each $t$-run models $\chi$ and the next state models $\varphi$}.
+Similarly, in case of $\neg \withTime{t}\ctlE\dctlX{\chi} \neg \varphi$, we get an intuitive meaning \emph{if the first direction of each $t$-run models $\chi$, the next state models $\varphi$}. Compare this to the meaning of $\withTime{t}\ctlA\dctlX{\chi}$, which states that \emph{the first direction of each $t$-run models $\chi$ and the next state models $\varphi$}.
 
 As we can see, not only are the semantics of these expressions different, but both semantics can be potentially useful. To leverage this fact, we define a new set of operators:
 
@@ -229,9 +261,9 @@ We call these operators \emph{weak}, because in the definition of each of these 
 	\item $\withTime{t}\ctlA\dctlFW{\chi} \varphi$ - \emph{all $t$-runs contain a point where $\chi$ is not satisfied or $\varphi$ is satisfied (and prior to this point, $\chi$ always holds)};
 \end{itemize}
 
-When using the weak operators, one has to keep in mind that even though the transition relation of each \ac{DTS} is both total and past-total, it is not necessarily total or past-total with respect to a specific direction formula $\chi$. Hence not only can one encounter runs that satisfy a weak formula due to a transition with does not satisfy $\chi$, one can even encounter complete \emph{direction deadlocks} - that is states which have no transition satisfying given $\chi$. In such states, all universal weak formulae are automatically satisfied. This fact on itself is not necessarily a disadvantage, however, one has to consider it when interpreting weak formulas.
+Finally, when using the weak operators, one has to keep in mind that even though the transition relation of each \ac{DTS} is both total and past-total, it is not necessarily total or past-total with respect to a specific direction formula $\chi$. Hence not only can one encounter runs that satisfy a weak formula due to a transition with does not satisfy $\chi$, one can even encounter complete \emph{direction deadlocks} — that is states, which have no transition satisfying given $\chi$. In such states, all universal weak formulae are automatically satisfied. This fact on itself is not necessarily a disadvantage, however, one has to consider it when interpreting weak formulas.
 
-\subsection{Other useful equivalences}
+\subsection{Other observations}
 \label{sec:huctlEnd}
 
 In this final subsection, we define a list of other useful equivalences that allow us to reduce the minimal set of operators needed to describe any \ac{HUCTLp} formula:
@@ -253,19 +285,17 @@ Based on these and previous observations in this section, we can see that one of
 	\hctlAt{x} \varphi, \hctlBind{x} \varphi, \hctlExists{x} \varphi
 \end{align*}
 
-(This is naturally not the only minimal operator set, however, it is the one we will consider from now on in this work)
+Naturally, this is not the only minimal operator set, however, it is the one we will consider from now on in this work.
 
 \section{\Acl{PDTS}}
 
-In order to reason about systems with parameters, we extend the definition of \ac{DTS} with the notion of parameters. A \ac{PDTS} is essentially a family of \acp{DTS} that share the same state space, but differ in terms of transition relations. 
+In order to reason about systems with parameters, we extend the definition of \ac{DTS} with the notion of parameters. A \ac{PDTS} is essentially a family of \acp{DTS} that share the same state space, but differ in terms of transition relations. Alternatively, one can view \ac{PDTS} as a \ac{DTS} where each transition is labelled not only with direction, but also with a parameter set.
 
 \subsection{Definition}
 
-Let \acl{PDTS} be a tuple $\mathcal{K} = \pdtsTuple$  where $\pdtsP$ is a finite set of parameter valuations and $\pdtsT$ is a parametrised transition relation $\pdtsT \subseteq \dtsS \times \dtsDir \times \pdtsP \times \dtsS$. We use the notation $\pdtsT_p$ to denote the parametrised transition relation restricted to a specific parameter valuation $p$, i.e. $\pdtsT_p = \{ (s, d, s') \in \dtsS \times \dtsDir \times \dtsS \mid (s, d, p, s') \in \pdtsT \}$.  We then write $\mathcal{K}_p$ to denote a specific parametrisation of the original $\mathcal{K}$—a \ac{DTS} such that $\mathcal{K}_p = (\dtsS, \dtsDir, \dtsT_p, \dtsAP, \dtsL)$. 
+\Acl{PDTS} is represented by a tuple $\mathcal{K} = \pdtsTuple$, where $\pdtsP$ is a finite set of parameter valuations and $\pdtsT$ is a parametrised transition relation $\pdtsT \subseteq \dtsS \times \dtsDir \times \pdtsP \times \dtsS$. We use the notation $\pdtsT_p$ to denote the parametrised transition relation restricted to a specific parameter valuation $p$, i.e. $\pdtsT_p = \{ (s, d, s') \in \dtsS \times \dtsDir \times \dtsS \mid (s, d, p, s') \in \pdtsT \}$.  We then write $\mathcal{K}_p$ to denote a specific parametrisation of the original $\mathcal{K}$—a \ac{DTS} such that $\mathcal{K}_p = (\dtsS, \dtsDir, \dtsT_p, \dtsAP, \dtsL)$. 
 
-We will write $\tP{s}{t}$ to denote the set of all parameter valuations for which the transition from $s$ to $t$ is allowed: $\tP{s}{t} = \{ p \in \pdtsP \mid \exists d \in \dtsDir : (s, d, p, t) \in \pdtsT \}$. The notion of time flows also naturally extends to \acp{PDTS} with $\future\pdtsT = \pdtsT$ and $\past\pdtsT = \{ (s, d, p, s') \mid (s', d, p, s) \in \pdtsT \}$.
-
-TODO: define transitions with d,p, with d, and without anything
+We	 write $\tP{s}{t}$ to denote the set of all parameter valuations for which the transition from $s$ to $t$ is allowed: $\tP{s}{t} = \{ p \in \pdtsP \mid \exists d \in \dtsDir : (s, d, p, t) \in \pdtsT \}$. The notion of time flows also naturally extends to \acp{PDTS} with $\future\pdtsT = \pdtsT$ and $\past\pdtsT = \{ (s, d, p, s') \mid (s', d, p, s) \in \pdtsT \}$.
 
 \subsection{Parameter representation}
 \label{sec:paramRepresentation}
@@ -279,29 +309,35 @@ We assume the following expressions can be used to reason about the parameter fo
 	\item $\withTime{t}dir(s, \chi ,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT \land d \models \chi$; which represents all parameters for which the transition is enabled and the given direction constraint is satisfied.
 \end{itemize}
 
-When reasoning about parameter formulae, we will usually use semantic equality (i.e. $\Phi_1 \equiv \Phi_2 \iff \forall p \in \pdtsP : p \models \Phi_1 \iff p \models \Phi_2$). In cases where syntactic equality is used instead of semantic equality, this fact will be explicitly stated. Notice that this allows us to reason about parameter formulae similarly to standard sets, however this needs to be taken into account when reasoning about complexity of various operations.
+When reasoning about parameter formulae, we will usually use semantic equality (i.e. $\Phi_1 \equiv \Phi_2 \iff \forall p \in \pdtsP : p \models \Phi_1 \iff p \models \Phi_2$). In cases where syntactic equality is used instead of semantic equality, this fact should be explicitly stated. Notice that this allows us to reason about parameter formulae similarly to standard sets, however this needs to be taken into account when reasoning about complexity of various operations.
 
 \section{Parameter Synthesis}
 
-The parameter synthesis problem for a \ac{PDTS} $\mathcal{K}$, an initial parameter constraint $\Phi_I$ and a \ac{HUCTLp} formula $\varphi$ is to compute a function $\mathcal{F}$ such that $\mathcal{F}(s) = \{p \in \pdtsP \mid (\mathcal{K}_p, h_0, s) \models \varphi \land p \models \Phi_I \}$.
+The parameter synthesis problem for a \ac{PDTS} $\mathcal{K}$, an initial parameter constraint $\Phi_I$ and a \ac{HUCTLp} formula $\varphi$ is to compute a function $\mathcal{F}$ such that $\mathcal{F}(s) = \{p \in \pdtsP \mid (\mathcal{K}_p, h_0, s) \models \varphi \land p \models \Phi_I \}$. Naive, enumerative solution would be to run standard global model checking procedure for each state. In Chapter \ref{chap:algorithm}, we introduce an algorithm which uses symbolic representation introduced in \ref{sec:paramRepresentation} to provide a faster method for deciding parameter synthesis.
 
 \section{Partitioning and \ac{PDTS} fragments}
 
-In order to distribute the \ac{PDTS} to several independent workers, we define the notion of \emph{fragments}. Any \ac{PDTS} can be divided into $N$ fragments using an injective partition function $f: \dtsS \to \{1, \ldots, N \}$. Intuitively, the partition function divides the state space of a \ac{PDTS} into $N$ disjoint groups (some of which may be empty) which we then call fragments. Such partitions can be then distributed to several independent agents to reduce the amount of resources required by a singular agent. However, this also usually introduces communication overhead. 
+\subsection{Fragments}
 
-We say that an agent $i$ \emph{owns} a state $s$ when the state is part of the agents fragment, that is $f(s) = i$. We also call these states \emph{local} and denote the set of all local states of the fragment $i$ as $\dtsSlocal_i$. Note that the sets of local states of each fragment are pairwise disjoint and their union constitutes the full state space $\dtsS$. 
+In order to distribute the \ac{PDTS} to several independent workers, we define the notion of \emph{fragments}. Any \ac{PDTS} can be divided into $N$ fragments using an injective partition function $f: \dtsS \to \{1, \ldots, N \}$. Intuitively, the partition function divides the state space of a \ac{PDTS} into $N$ disjoint groups (some of which may be empty) which we then call fragments. Such partitions can be then distributed to several independent agents to reduce the amount of resources required by a singular agent during algorithm execution. However, this also usually introduces a communication overhead. 
 
-All states that are not local, but can directly reach or be reached from a local state are called border states of fragment $i$ and are denoted $\dtsSborder_i$. Formally, state $s \in \dtsS \setminus \dtsSlocal_i$ is a border state if and only if there exists $t \in \dtsSlocal_i$ such that $s \tsTransition t$ or $t \tsTransition s$. Please observe that the border state sets for different fragments can intersect and if $s$ is a border state in fragment $i$, then $t$ is a border state in fragment $f(s)$.
+We say that an agent $i$ \emph{owns} a state $s$ when the state is part of the agents fragment, that is $f(s) = i$. We also call these states \emph{local} and denote the set of all local states of the fragment $i$ as $\dtsSlocal_i$. Note that the sets of the local states of each fragment are pairwise disjoint and their union constitutes the full state space $\dtsS$. 
+
+All states that are not local, but can directly reach or be reached from a local state are called \emph{border} states of fragment $i$ and are denoted $\dtsSborder_i$. Formally, state $s \in \dtsS \setminus \dtsSlocal_i$ is a border state if and only if there exists $t \in \dtsSlocal_i$ such that $s \tsTransition t$ or $t \tsTransition s$. Please observe that the border state sets for different fragments can intersect and if $s$ is a border state in fragment $i$, then $t$ is a border state in fragment $f(s)$.
+
+We write $\dtsSrelevant_i = \dtsSlocal_i \cup \dtsSborder_i$ to denote the set of the \emph{relevant} states. That is, the states which directly influence the value of local states.
 
 Finally, all states which are not local nor border states are called remote. The set of all remote states is denoted $\dtsSremote_i$. Furthermore, for each fragment $i$ holds that $\dtsS = \dtsSlocal_i \cup \dtsSborder_i \cup \dtsSremote_i$ and that $\emptyset = \dtsSlocal_i \cap \dtsSborder_i \cap \dtsSremote_i$.
+
+\subsection{Partitioning}
 
 In this section, we also define two key properties of a partition function that influence the overall effectiveness of resource distribution and the expected communication overhead:
 
 \begin{itemize}
 	\item  \emph{The uniformity of the partitioning}. That is, to ensure that the sizes of $\dtsSlocal_i$ are always almost equal. Naturally, exact equality can't always be achieved, however, a good uniform partition function should ensure that the maximum size difference between fragments does not grow with the size of the system, but rather with the number of partitions.
-	\item \emph{Number of cross transitions}. A cross transition is a transition that leads between two states in different fragments of the system. Such transition is usually a source of communication overhead, since any related operation usually involves both fragments. Hence the amount of cross transitions directly influences the overall communication overhead. Also observe that this number is very closely related to the size of the $\dtsSborder_i$ sets, since the states at each end of the cross transitions will be considered as border states in one of the fragments.
+	\item \emph{Number of cross transitions}. A cross transition is a transition that leads between two states in different fragments of the system. Such transition is usually a source of communication overhead, since any related operation usually involves both fragments and therefore requires some communication. Hence the amount of cross transitions directly influences the overall communication overhead. Also observe that this number is very closely related to the size of the $\dtsSborder_i$ sets, since the states at each end of the cross transitions will be considered as border states in one of the fragments.
 \end{itemize}
 
 As we can see, in order to achieve good performance, the partition function needs to satisfy both of these properties. However, this can't be easily achieved for all systems. Without any prior knowledge of the system, one could design a partition function that would be close to uniformity, but that might also introduce a significant amount of cross transitions. Similarly, if one were to focus on optimizing the amount of cross transitions, the resulting partitioning might not be uniform enough to be able to distribute to agents with limited resources.
 
-Later in this work, we are going to describe how to exploit specific properties of biological models to design partitioning that is both uniform and which ensures on average a small amount of cross transitions.
+In the Implementation Chapter \ref{chap:implementation}, we describe how to exploit specific properties of models based on dynamical systems to design partitioning that is both uniform and ensures on average a small amount of cross transitions.
