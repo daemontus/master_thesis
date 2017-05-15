@@ -1,0 +1,137 @@
+
+In this chapter, we provide evidence to support the claim that our algorithm scales well with increasing amount of computational resources, and that the algorithm is useful, meaning it can provide interesting, non trivial information about the studied model.
+
+\section{Models}
+
+In order to evaluate the algorithm, we first need to define some non-trivial models which we will use to do so. These models, coming from the field of systems biology, are described in this section.
+
+All of the models can be scaled in terms of state and parameter space cardinality by increasing the precision of the piecewise linear approximation.
+
+\subsection{Bi-stable repressilator}
+
+The first model to be considered is the smallest repressilator motif, studied in~\cite{brim2015high,dilao}. It includes two nodes which inhibit each other (see Figure \ref{fig:2Drep} (left)). In biology, this motif is very often present in gene regulatory networks, where $X$ represents product of $gene X$ which inhibits production of $gene Y$ and vice versa.
+
+There are several ways to parametrise this model. In this work, we choose $\phi_X$ and $\phi_Y$ as our parameters, each in the $(0, 1)$ interval (unless explicitly stated otherwise).
+
+\begin{figure}
+	\centering
+	\begin{center}
+		\vspace*{-6mm}
+		\hspace*{-1cm}  
+		\parbox{4cm}{\includegraphics[scale=.6]{2Drep.pdf}}~
+		\parbox{6cm}{
+			$$\begin{array}{c@{$\,=\,$}l}
+			\frac{d[X]}{dt} & k_1 \frac{K_{1}^{n_1}}{K_{1}^{n_1}+[Y]^{n_1}} - \phi_{X}[X]\\[3mm]
+			\frac{d[Y]}{dt} & k_2 \frac{K_{2}^{n_2}}{K_{2}^{n_2}+[X]^{n_2}} - \phi_{Y}[Y]
+			\end{array}$$
+			\center
+			$k_1=k_2=1$, $K_{1}=K_{2}=5$, \\
+			$n_1=n_2=5$
+		}~~
+		\vspace*{-5mm}
+	\end{center}
+	\caption{Bi-stable repressilator regulatory network (left) and its ODE model taken from~\cite{brim2015high} (middle).}
+	\vspace*{-0.5em}
+	\label{fig:2Drep}
+\end{figure}
+
+\subsection{Tri-stable toggle switch}
+
+Tri-stable toggle switch is a model of 3-variable repressilator in which each node inhibits not only one but both of its neighbours (see Figure \ref{fig:3Drep} (left)). Just one of the two ingoing inhibition is enough to repress any entity. Therefore the ODE model possesses multiplication of negative hill function in entity regulation (Fig.~\ref{fig:3Drep} (right)).
+
+Similarly to the bi-stable repressilator, we choose $\phi_X$, $\phi_Y$ and $\phi_Z$ as our parameters, each in the $(0.1, 0.2)$ interval (unless stated otherwise). 
+
+\begin{figure}
+	\begin{center}
+		% \vspace*{-6mm}
+		\hspace*{-1cm}  \parbox{5cm}{\includegraphics[scale=.6]{triStableRep.pdf}}~
+		\parbox{7cm}{
+			$$\begin{array}{c@{$\,=\,$}l}
+			\frac{d[X]}{dt} & k_{1} \frac{K_{y_1}^{n_1}}{K_{y_1}^{n_1}+[Y]^{n_1}}\cdot \frac{K_{z_1}^{n_2}}{K_{z_1}^{n_2}+[Z]^{n_2}} - \phi_{X}[X]\\[3mm]
+			\frac{d[Y]}{dt} & k_{2} \frac{K_{x_2}^{n_3}}{K_{x_2}^{n_3}+[X]^{n_3}} \cdot \frac{K_{z_2}^{n_4}}{K_{z_2}^{n_4}+[Z]^{n_4}} - \phi_{Y}[Y]\\[3mm]
+			\frac{d[Z]}{dt} & k_{3} \frac{K_{x_3}^{n_5}}{K_{x_3}^{n_5}+[X]^{n_5}}\cdot \frac{K_{y_3}^{n_6}}{K_{y_3}^{n_6}+[Y]^{n_6}} - \phi_{Z}[Z]
+			\end{array}$$
+			\center
+			$\forall i,j; k_{i}=1$,\\ $K_{x_i}=K_{y_i}=K_{z_i}=5$, 
+			$n_j=5$
+		}\\
+		%\vspace*{-5mm}
+	\end{center}
+	\caption{Tri-stable toggle switch regulatory network and its ODE model.}
+	%\vspace*{-0.5em}
+	\label{fig:3Drep}
+\end{figure}
+
+\section{Scalability}
+
+\section{Applicability}
+
+To demonstrate the applicability of our approach, we provide an analysis of the stable states of our models, as discovered by the algorithm.
+
+\subsubsection{\textbf{Properties}}
+
+We will study two types of stability motifs. First is a terminal strongly connected component, which can be represented using the \ac{HUCTLp} formula $tSCC = \hctlBind{x} \future\ctlA\ctlG \future\ctlE\ctlF x$. Intuitively, a terminal strongly connected component is a maximal set of states that are pairwise reachable (meaning from any state, I can reach the whole component, but nothing else).
+
+Second motif is a terminal cycle, represented using the formula $tCycle = \hctlBind{x} \future\ctlA\ctlX \future\ctlA\ctlF$. Intuitively, a terminal cycle is a stronger requirement than a terminal component, since the component can contain multiple interleaving cycles, while the terminal cycle property explicitly specifies that there is exactly one cycle (otherwise the $\ctlA$ requirement would be broken).
+
+Notice that we would expect each model to have at least one terminal strongly connected component, however, no such requirement can be imposed to terminal cycles.
+
+In order to show that there are at least two distinct instances of the studied patterns (either $tSCC$ or $tCycle$) in the model, we use the following property: $biPattern = \hctlBind{x} \hctlExists{z \in pattern} pattern \land \neg \future\ctlE\ctlF z$. This property holds in states where the $pattern$ is satisfied and there exists other state (also satisfying $pattern$) not reachable from this state. This is implies presence of two instances, since both our patterns are terminal. Also notice the use of the $exists-in$ operator, which guarantees only appropriate $z$ are considered, thus simplifying the property description and computation performance. Such formula can be further generalised to imply presence of three distinct instances if needed.
+
+Similarly, we can be interested in presence of exactly one instance of the studied pattern. To this end, we can simply use the property $single = pattern \land \neg biPattern$.
+
+\subsubsection{\textbf{Bi-stable repressilator}}
+
+The results of our analysis for the bi-stable repressilator are presented in Figures \ref{fig:biSCC} and \ref{fig:biCycle}. Each figure contains a state space plot and a parameter space plot, where green colour signifies the presence of exactly one pattern instance and the yellow colour signifies presence of exactly two pattern instances. Furthermore, in the state space plot, the mixture of green and yellow represents that either one or two instances of the studied pattern are present, depending on the parameter valuation.
+
+The results of our terminal component analysis are presented in Figure \ref{fig:biSCC}. As expected, the model contains either one or two terminal components, depending on the parameter valuation. Furthermore, the location of these components is clearly visible in the state space plot (right). 
+
+The analysis of the terminal cycles is presented in Figure \ref{fig:biCycle}. As we can see, the model contains parameter valuations for which no terminal cycle is present. For these valuations a manual inspection revealed that multiple non-terminal cycles are present in the model.
+
+\begin{figure}
+	
+	\begin{center}
+		\begin{overpic}[width=.5\textwidth]{results/2D/scc_state.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/2D/scc_param.png}\end{overpic}\hfill
+	\end{center}
+	
+	\caption{Presence of two terminal strongly connected components in the bi-stable repressilator model. The parameter space (right) has been zoomed to cover only the interesting area.  }
+	\label{fig:biSCC}
+\end{figure}
+
+\begin{figure}
+	
+	\begin{center}
+		\begin{overpic}[width=.5\textwidth]{results/2D/cycle_state.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/2D/cycle_param.png}\end{overpic}\hfill
+	\end{center}
+	
+	\caption{Presence of two terminal cycles in the bi-stable repressilator model.}
+	\label{fig:biCycle}
+\end{figure}
+
+\subsubsection{\textbf{Tri-stable toggle switch}}
+
+The results of the analysis for the tri-stable toggle switch are presented in Figures .... The colouring scheme follows similar rules as in the case of the bi-stable repressilator 
+
+\begin{figure}
+	
+	\begin{center}
+		\begin{overpic}[width=.5\textwidth]{results/2D/scc_state.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/2D/scc_param.png}\end{overpic}\hfill
+	\end{center}
+	
+	\caption{Presence of two terminal strongly connected components in the bi-stable repressilator model. The parameter space (right) has been zoomed to cover only the interesting area.  }
+	\label{fig:triSCC}
+\end{figure}
+
+\begin{figure}
+	
+	\begin{center}
+		\begin{overpic}[width=.5\textwidth]{results/2D/cycle_state.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/2D/cycle_param.png}\end{overpic}\hfill
+	\end{center}
+	
+	\caption{Presence of two terminal cycles in the bi-stable repressilator model.}
+	\label{fig:triCycle}
+\end{figure}
