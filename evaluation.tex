@@ -62,27 +62,27 @@ Similarly to the bi-stable repressilator, we choose $\phi_X$, $\phi_Y$ and $\phi
 	\label{fig:3Drep}
 \end{figure}
 
-\section{Scalability}
-
 \section{Applicability}
 
 To demonstrate the applicability of our approach, we provide an analysis of the stable states of our models, as discovered by the algorithm.
 
 \subsubsection{\textbf{Properties}}
 
-We will study two types of stability motifs. First is a terminal strongly connected component, which can be represented using the \ac{HUCTLp} formula $tSCC = \hctlBind{x} \future\ctlA\ctlG \future\ctlE\ctlF x$. Intuitively, a terminal strongly connected component is a maximal set of states that are pairwise reachable (meaning from any state, I can reach the whole component, but nothing else).
+We study two types of stability motifs. First is a terminal strongly connected component, which can be represented using the \ac{HUCTLp} formula $tSCC = \hctlBind{x} \future\ctlA\ctlG \future\ctlE\ctlF x$. Intuitively, a terminal strongly connected component is a maximal set of states that are pairwise reachable (meaning that from any state, I can reach the whole component, but nothing else).
 
 Second motif is a terminal cycle, represented using the formula $tCycle = \hctlBind{x} \future\ctlA\ctlX \future\ctlA\ctlF$. Intuitively, a terminal cycle is a stronger requirement than a terminal component, since the component can contain multiple interleaving cycles, while the terminal cycle property explicitly specifies that there is exactly one cycle (otherwise the $\ctlA$ requirement would be broken).
 
 Notice that we would expect each model to have at least one terminal strongly connected component, however, no such requirement can be imposed to terminal cycles.
 
-In order to show that there are at least two distinct instances of the studied patterns (either $tSCC$ or $tCycle$) in the model, we use the following property: $biPattern = \hctlBind{x} \hctlExists{z \in pattern} pattern \land \neg \future\ctlE\ctlF z$. This property holds in states where the $pattern$ is satisfied and there exists other state (also satisfying $pattern$) not reachable from this state. This is implies presence of two instances, since both our patterns are terminal. Also notice the use of the $exists-in$ operator, which guarantees only appropriate $z$ are considered, thus simplifying the property description and computation performance. Such formula can be further generalised to imply presence of three distinct instances if needed.
+In order to show that there are at least two distinct instances of the studied patterns (either $tSCC$ or $tCycle$) in the model, we use the following property: $biPattern = \hctlExists{a \in pattern} pattern \land \neg \future\ctlE\ctlF a$. The property holds in states where the $pattern$ is satisfied and there exists other state (also satisfying $pattern$) not reachable from this state. This is implies presence of two pattern instances, since both our patterns are terminal. Also notice the use of the $exists-in$ operator, which guarantees only appropriate $z$ are considered, thus simplifying the property description and computation performance. 
 
-Similarly, we can be interested in presence of exactly one instance of the studied pattern. To this end, we can simply use the property $single = pattern \land \neg biPattern$.
+Such formula can be further generalised to imply presence of three distinct instances: $triPattern = \hctlExists{a \in pattern} \hctlExists{b \in pattern} pattern \land \neg \future\ctlE\ctlF a \land \future\ctlE\ctlF b \land (\hctlAt{a} \future\ctlE\ctlF b)$. 
+
+Finally, we can be interested in presence of exactly one instance (or exactly two) of the studied pattern. To this end, we can simply use the property $single = pattern \land \neg biPattern \land \neg triPattern$. 
 
 \subsubsection{\textbf{Bi-stable repressilator}}
 
-The results of our analysis for the bi-stable repressilator are presented in Figures \ref{fig:biSCC} and \ref{fig:biCycle}. Each figure contains a state space plot and a parameter space plot, where green colour signifies the presence of exactly one pattern instance and the yellow colour signifies presence of exactly two pattern instances. Furthermore, in the state space plot, the mixture of green and yellow represents that either one or two instances of the studied pattern are present, depending on the parameter valuation.
+The results of our analysis of the bi-stable repressilator are presented in Figures \ref{fig:biSCC} and \ref{fig:biCycle}. Each figure contains a state space plot and a parameter space plot, where green colour signifies the presence of exactly one pattern instance and the yellow colour signifies presence of exactly two pattern instances. Furthermore, in the state space plot, the mixture of green and yellow represents that either one or two instances of the studied pattern are present, depending on the parameter valuation.
 
 The results of our terminal component analysis are presented in Figure \ref{fig:biSCC}. As expected, the model contains either one or two terminal components, depending on the parameter valuation. Furthermore, the location of these components is clearly visible in the state space plot (right). 
 
@@ -112,26 +112,50 @@ The analysis of the terminal cycles is presented in Figure \ref{fig:biCycle}. As
 
 \subsubsection{\textbf{Tri-stable toggle switch}}
 
-The results of the analysis for the tri-stable toggle switch are presented in Figures .... The colouring scheme follows similar rules as in the case of the bi-stable repressilator 
+The results of our analysis of the tri-stable toggle switch are presented in Figures \ref{fig:triSCC} and \ref{fig:triCycle}. The presentation of these results is affected by the dimensionality of the model in question. Mainly, we present the dependence of just two variables (parameters) and project the remaining values into such plane. This makes the colour-mixing approach taken in the previous case infeasible, since there is no way to distinguish truly intersecting properties from the projected ones. Therefore we assume the reader is more interested in higher counts of pattern instances and prioritise those. All visualisations are produced directly using Pithya and the full results are available as a digital attachment to this work. The reader is therefore encouraged to inspect the data directly in case of any further questions.
+
+As we can see in Figure \ref{fig:triSCC}, the model can contain either one, two, or three terminal strongly connected components, depending on the parameter valuations. The state space covered by the components appears to be continuous due to the dimensional projection. In fact, the three components are located in the corners of the projected triangle, while the triangle itself spans all three dimensions. Depending on the parameter valuation, the triangle can contract to produce two, or just one component.
+
+Figure \ref{fig:triCycle} then presents similar results, but as we can see, the stronger requirement of terminal cycles produces smaller result set. Interesting observation is that for the selected parametrisations, at least one terminal cycle is always present (This is not directly implied by the plots, since they are projections. It has been verified separately).
 
 \begin{figure}
 	
 	\begin{center}
-		\begin{overpic}[width=.5\textwidth]{results/2D/scc_state.png}\end{overpic}\hfill
-		\begin{overpic}[width=.5\textwidth]{results/2D/scc_param.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/3D/scc_state.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/3D/scc_param.png}\end{overpic}\hfill
 	\end{center}
 	
-	\caption{Presence of two terminal strongly connected components in the bi-stable repressilator model. The parameter space (right) has been zoomed to cover only the interesting area.  }
+	\caption{Presence of one (green), two (yellow) and three (blue) terminal strongly connected components in the tri-stable toggle switch model. Remaining dimensions have been projected into the plots.  }
 	\label{fig:triSCC}
 \end{figure}
 
 \begin{figure}
 	
 	\begin{center}
-		\begin{overpic}[width=.5\textwidth]{results/2D/cycle_state.png}\end{overpic}\hfill
-		\begin{overpic}[width=.5\textwidth]{results/2D/cycle_param.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/3D/cycle_state.png}\end{overpic}\hfill
+		\begin{overpic}[width=.5\textwidth]{results/3D/cycle_param.png}\end{overpic}\hfill
 	\end{center}
 	
-	\caption{Presence of two terminal cycles in the bi-stable repressilator model.}
+	\caption{Presence of one (green), two (yellow) and three (blue) terminal cycles in the tri-stable toggle switch model. Remaining dimensions have been projected into the plots.}
 	\label{fig:triCycle}
 \end{figure}
+
+\section{Scalability}
+
+We evaluate the scalability of the algorithm using two \ac{CTL} and two \ac{HUCTLp} properties. Each property has been tested on a model with an appropriate state space size (since \ac{HUCTLp} properties are usually much harder to verify). The results of this analysis are presented in Table \ref{tab:scale}. As we can see, the algorithm scales with increasing amount of computational resources. The evaluation has been performed on a 64-core server and is taken as an overage over five runs. However, the access to this server was not exclusive.
+
+\begin{table}[]
+	\centering
+	\caption{My caption}
+	\label{my-label}
+	\begin{tabular}{l|llllllll}
+		\hline
+		& \multicolumn{4}{l}{Bi-stable repressilator}               & \multicolumn{4}{l|}{Tri-stable toggle switch}        \\ \hline
+		State count & \multicolumn{2}{c}{Xe10} & \multicolumn{2}{c}{Xe10}       & \multicolumn{2}{c|}{Xe10} & \multicolumn{2}{c}{Xe10} \\ \cline{1-1}
+		Property    & p1          & p2         & p3  & \multicolumn{1}{l|}{p4}  & p5          & p6          & p7          & p8         \\ \hline
+		1cpu/4gb    &             &            &     &                          &             &             &             &            \\ \hline
+		2cpu/8gb    &             &            &     &                          &             &             &             &            \\ \hline
+		4cpu/16gb   &             &            &     &                          &             &             &             &            \\ \hline
+		8cpu/32gb   &             &            &     &                          &             &             &             &           
+	\end{tabular}
+\end{table}
