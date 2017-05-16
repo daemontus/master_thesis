@@ -35,27 +35,9 @@ Before describing the components of the parameter synthesis module, we have to d
 Now that we have described how the parameter synthesis module approaches states and parameters, we can describe basic interfaces that need to be implemented by potential users. Here, we provide the list of all of these interfaces with short descriptions of their functionality. However, the implementations have to adhere to a set of required invariants and synchronization rules in order for the algorithm to be valid, therefore we refer the reader to the source code documentation for more detailed information about each interface.
 
 \begin{itemize}
-	\item \texttt{StateMap} State map is a simple map interface which provides a way to represent the state—parameter mapping used when computing the assumption function. However, as opposed to the assumption function, \texttt{StateMap} is a general purpose interface used throughout the code whenever a state—parameter collection is needed (successor/predecessor representation, communication, etc.). It is immutable by default, however there is a mutable variant which is used to represent incomplete results. The module provides some basic implementations:
+	\item \texttt{StateMap} State map is a simple map interface which provides a way to represent the state—parameter mapping used when computing the assumption function. However, as opposed to the assumption function, \texttt{StateMap} is a general purpose interface used throughout the code whenever a state—parameter collection is needed (successor/predecessor representation, communication, etc.). It is immutable by default, however there is a mutable variant which is used to represent incomplete results. For the list of available implementations, see code documentation.
 	
-	\begin{itemize}
-		\item \texttt{EmptyStateMap} Self-explanatory.
-		\item \texttt{SingletonStateMap} Maps one state to specified parameter formula and all remaining states to a default value.
-		\item \texttt{ConstantStateMap} Maps all states specified by a bit set to one given parameter formula. Useful for representing precomputed propositions.
-		\item \texttt{HashStateMap} Implementation backed by a standard JVM \texttt{HashMap}. Useful for sparse or small maps.
-		\item \texttt{ContinuousHashMap} Implementation backed by a continuous array (with possible offset). Useful for dense maps that need to be updated fast.
-		\item \texttt{PartitionStateMap} A view of another state map which presents only the local states of a specific fragment present in the original map.
-		\item \texttt{LazyStateMap} A state map which produces results on demand based on a given function. It is used to implement a \texttt{LazyAndMap}, \texttt{LazyOrMap} and \texttt{LazyComplementMap}.
-	\end{itemize}
-	
-	\item \texttt{Solver} The solver should be capable of providing basic constants ($\ttrue, \ffalse$) and performing standard operations such as: Conjunction, disjunction, complement (negation), test for emptiness (satisfiability) and formula simplification. These operations are then used to implement more complex, algorithm specific operations (for example the $\Leftarrow$ introduced in section TODO[assumptions]). User is also free to override these default implementations assuming a more efficient alternative is available. Finally, each solver should be able to serialize a parameter constraint into a byte buffer so that it can be safely transferred between fragments.
-	
-	Additionally, the module provides sample explicit solvers based on standard collections. These usually don't scale very well with increasing number of parameter valuations, but provide a good starting point for implementing and debugging more complex solvers:
-	
-	\begin{itemize}
-		\item \texttt{BoolSolver} Basic solver for models without parameters.
-		\item \texttt{IntSetSolver} Solver which expects a set of parameter valuations that can be mapped to unique integers.
-		\item \texttt{BitSetSolver} Much faster variant of \texttt{IntSetSolver} which additionally requires the parameter valuation identifiers to be consecutive integers (so that they can be inserted into a standard bit set).
-	\end{itemize}
+	\item \texttt{Solver} The solver should be capable of providing basic constants ($\ttrue, \ffalse$) and performing standard operations such as: Conjunction, disjunction, complement (negation), test for emptiness (satisfiability) and formula simplification. These operations are then used to implement more complex, algorithm specific operations. User is also free to override these default implementations assuming a more efficient alternative is available. Finally, each solver should be able to serialize a parameter constraint into a byte buffer so that it can be safely transferred between fragments. Additionally, the module provides sample explicit solvers based on standard collections. These usually don't scale very well with increasing number of parameter valuations, but provide a good starting point for implementing and debugging more complex solvers (for full list, see code documentation).
 	
 	\item \texttt{Partition} Combining the \ac{PDTS} fragment with its the partition function, the \texttt{Partition} interface provides the total amount of fragments, current fragment identifier, methods for obtaining predecessors and successors of a specific state plus the ability to evaluate atomic propositions.
 	
@@ -140,7 +122,7 @@ Finally, this module also provides an \texttt{Abstract Model} class which implem
 
 The command line frontend connects all these modules into one package with a well defined input and output. Schematic description of this module is given in Figure \ref{fig:cli_workflow}.
 
-The process starts by parsing given input files and creating $N$ independent partitions connected using a shared memory communication channel. These data structures are then passed into the parameter synthesis engine, which is described in Section TODO.
+The process starts by parsing given input files and creating $N$ independent partitions connected using a shared memory communication channel. These data structures are then passed into the parameter synthesis engine.
 
 As soon as the parameter synthesis is finished, the frontend module obtains $N$ partial results from the synthesis engine. These partial results are then merged into one general result set. Finally, the result set can be exported using two supported output formats. First format provides export into a machine readable .json file, suitable for further post-processing or visualisations. Second format provides a more human readable text format, which can be useful when debugging or working with simple models.
 
@@ -148,5 +130,5 @@ The actual content of both formats depends on the type of parameter representati
 
 Finally, a set of diagnostic and benchmarking data is collected during the computation. These include the amount and frequency of data transfers between partitions (to monitor possible communication bottlenecks) and the average solver throughput (corresponds to the complexity of parameter constrains which were encountered during the computation). These data are generally printed directly to the standard output or can be easily redirected into a separate file.
 
-For a detailed description of the command line arguments accepted by the frontend module, see Appendix TODO. Appendix TODO then provides a schematic description of the .json output format for machine processing.
+For a detailed description of the command line arguments accepted by the frontend module, see the tool manual [CITE].
 
