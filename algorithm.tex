@@ -44,6 +44,7 @@ Finally, we assume a partial ordering on the set of all possible assumption func
 Under such ordering, the set of all assumption functions forms a complete lattice. This ordering captures the intuitive understanding of computation progress, because an assumption function $\assume_2$ is bigger than $\assume_1$ only if the complete knowledge about the system is higher in $\assume_2$. Also observe that the highest element of every chain is an assumption function with no unknown parameters while the lowest element is the $\assume_0$. 
 
 \subsection{Semantic function}
+\label{sec:semantic}
 
 In order to compute the maximal valid assumption function for a \ac{PDTS} fragment $\mathcal{K}_i = \pdtsTuple$, we define a semantic function $\mathcal{C}_\mathcal{K}(\assume_{in}) = \assume_{out}$ which (if possible) increases the given assumption (with respect to the ordering) while preserving assumption validity.
 
@@ -295,15 +296,15 @@ Finally, if a parametrisation is unknown due to a circular dependency between as
 	When the algorithm exits the main cycle and enters line 13, all unknown assumptions for the local states $\assumeU(\psi, h, s)$ are empty.
 \end{lemma}
 
-This is easy to show, because in each iteration, the procedure \textsc{IncreaseCycles} increases at least one unknown parameter valuation to the negative value for some state (assuming unknown parameter valuations exist). 
+\textbf{Proof} This is easy to show, because in each iteration, the procedure \textsc{IncreaseCycles} increases at least one unknown parameter valuation to the negative value for some state (assuming unknown parameter valuations exist). 
 
-Therefore, assuming there are some unknown assumptions, there must exists the smallest formula $\psi$ such that some of its assumptions are unknown and yet all sub-formulae are already known. These unknown assumptions are then promoted to negative ones by the \textsc{IncreaseCycles} procedure. Hence after a finite number of repetitions, \textsc{IncreaseCycles} increases all unknown parameter valuations to negative ones.
+Therefore, assuming there are some unknown assumptions, there must exists the smallest formula $\psi$ such that some of its assumptions are unknown and yet all sub-formulae are already known. These unknown assumptions are then promoted to negative ones by the \textsc{IncreaseCycles} procedure. Hence after a finite number of repetitions, \textsc{IncreaseCycles} increases all unknown parameter valuations to negative ones. \qed
 
 \begin{theorem}
 	Algorithm \ref{alg:main} computes the parameter synthesis problem for a given \ac{PDTS} $\mathcal{K}$ and a given \ac{HUCTLp} property $\varphi$.
 \end{theorem}
 
-By Lemma \ref{lemma:unknown}, there are no unknown parameter valuations for the local states of each fragment. Therefore an union across all fragments ensures that there are no unknown parameter valuations across the whole state space. Furthermore, since the assumption functions of each fragment are valid (by Lemma 	\ref{lemma:semantic}, \ref{lemma:comm} and \ref{lemma:cycles}), the resulting assumption function is also valid.
+\textbf{Proof} By Lemma \ref{lemma:unknown}, there are no unknown parameter valuations for the local states of each fragment. Therefore an union across all fragments ensures that there are no unknown parameter valuations across the whole state space. Furthermore, since the assumption functions of each fragment are valid (by Lemma 	\ref{lemma:semantic}, \ref{lemma:comm} and \ref{lemma:cycles}), the resulting assumption function is also valid. \qed
 
 \subsection{Notes on the semantic function and complexity}
 
