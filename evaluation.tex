@@ -144,18 +144,20 @@ Figure \ref{fig:triCycle} then presents similar results, but as we can see, the 
 
 We evaluate the scalability of the algorithm using two \ac{CTL} and two \ac{HUCTLp} properties. Each property has been tested on a model with an appropriate state space size (since \ac{HUCTLp} properties are usually much harder to verify). The results of this analysis are presented in Table \ref{tab:scale}. As we can see, the algorithm scales with increasing amount of computational resources. The evaluation has been performed on a 64-core server and is taken as an overage over five runs. However, the access to this server was not exclusive.
 
+$\varphi_3 = \hctlBind{x} \future\ctlE\ctlX \future\ctlE\ctlF x$
+$\varphi_4 = \hctlBind{x} \future\ctlA\ctlX \future\ctlA\ctlF x$
+
 \begin{table}[]
 	\centering
 	\caption{My caption}
 	\label{my-label}
-	\begin{tabular}{l|llllllll}
-		\hline
-		& \multicolumn{4}{l}{Bi-stable repressilator}               & \multicolumn{4}{l|}{Tri-stable toggle switch}        \\ \hline
-		State count & \multicolumn{2}{c}{Xe10} & \multicolumn{2}{c}{Xe10}       & \multicolumn{2}{c|}{Xe10} & \multicolumn{2}{c}{Xe10} \\ \cline{1-1}
-		Property    & p1          & p2         & p3  & \multicolumn{1}{l|}{p4}  & p5          & p6          & p7          & p8         \\ \hline
-		1cpu/4gb    &             &            &     &                          &             &             &             &            \\ \hline
-		2cpu/8gb    &             &            &     &                          &             &             &             &            \\ \hline
-		4cpu/16gb   &             &            &     &                          &             &             &             &            \\ \hline
-		8cpu/32gb   &             &            &     &                          &             &             &             &           
+	\begin{tabular}{l|cccc|cccc}
+		& \multicolumn{4}{l|}{Bi-stable repressilator}         & \multicolumn{4}{l}{Tri-stable toggle switch}        \\ \hline
+		State count & \multicolumn{2}{c}{1e10} & \multicolumn{2}{c|}{$\sim$1000} & \multicolumn{2}{c}{Xe10} & \multicolumn{2}{c}{$\sim3000$} \\ \hline
+		Property    & $\varphi_1$ & $\varphi_2$ & $\varphi_3$ & $\varphi_4$ & $\varphi_1$ & $\varphi_2$ & $\varphi_3$ & $\varphi_4$  \\ \hline
+		1cpu/4gb    &             &             & 270s &            &             &             &             &            \\
+		2cpu/8gb    &             &             & 219s &            &             &             &             &            \\
+		4cpu/16gb   &             &             & 186s &            &             &             &             &            \\
+		8cpu/32gb   &             &             & 136s &            &             &             &             & 113s     
 	\end{tabular}
 \end{table}
