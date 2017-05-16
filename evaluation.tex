@@ -142,22 +142,32 @@ Figure \ref{fig:triCycle} then presents similar results, but as we can see, the 
 
 \section{Scalability}
 
-We evaluate the scalability of the algorithm using two \ac{CTL} and two \ac{HUCTLp} properties. Each property has been tested on a model with an appropriate state space size (since \ac{HUCTLp} properties are usually much harder to verify). The results of this analysis are presented in Table \ref{tab:scale}. As we can see, the algorithm scales with increasing amount of computational resources. The evaluation has been performed on a 64-core server and is taken as an overage over five runs. However, the access to this server was not exclusive.
+We evaluate the scalability of the algorithm using two \ac{CTL} and two \ac{HUCTLp} properties:
 
-$\varphi_3 = \hctlBind{x} \future\ctlE\ctlX \future\ctlE\ctlF x$
-$\varphi_4 = \hctlBind{x} \future\ctlA\ctlX \future\ctlA\ctlF x$
+\begin{align*}
+	\varphi_1 = \future\ctlE\ctlF center \\
+	\varphi_2 = \future\ctlA\ctlF center \\
+	\varphi_3 = \hctlBind{x} \future\ctlE\ctlX \future\ctlE\ctlF x \\
+	\varphi_4 = \hctlBind{x} \future\ctlA\ctlX \future\ctlA\ctlF x \\
+\end{align*}
+
+Here, $center$ specifies a proposition which is satisfied only in the very middle state of the model.
+
+Each property has been tested on a model with an appropriate state space size (since \ac{HUCTLp} properties are usually much harder to verify). The results of this analysis are presented in Table \ref{tab:scale}. As we can see, the algorithm scales with increasing amount of computational resources, the only problem being the $\ctlA\ctlF$ query on the two dimensional model. Further inspection revealed that the algorithm is not able to parallelise this query very well, because the valid state space does not provide much opportunities to branch the exploration into multiple parallel directions.
+
+The evaluation has been performed on a 64-core server and is taken as an overage over five runs. However, the access to this server was not exclusive. The computation was restricted to the specified amount of processors and RAM during each experiment.
 
 \begin{table}[]
 	\centering
-	\caption{My caption}
-	\label{my-label}
-	\begin{tabular}{l|cccc|cccc}
-		& \multicolumn{4}{l|}{Bi-stable repressilator}         & \multicolumn{4}{l}{Tri-stable toggle switch}        \\ \hline
-		State count & \multicolumn{2}{c}{1e10} & \multicolumn{2}{c|}{$\sim$1000} & \multicolumn{2}{c}{Xe10} & \multicolumn{2}{c}{$\sim3000$} \\ \hline
-		Property    & $\varphi_1$ & $\varphi_2$ & $\varphi_3$ & $\varphi_4$ & $\varphi_1$ & $\varphi_2$ & $\varphi_3$ & $\varphi_4$  \\ \hline
-		1cpu/4gb    &             &             & 270s &            &             &             &             &            \\
-		2cpu/8gb    &             &             & 219s &            &             &             &             &            \\
-		4cpu/16gb   &             &             & 186s &            &             &             &             &            \\
-		8cpu/32gb   &             &             & 136s &            &             &             &             & 113s     
+	\caption{Scalability results}
+	\label{tab:scale}
+	\begin{tabular}{l|M{0.8cm}M{0.8cm}M{0.8cm}M{0.8cm}|M{0.8cm}M{0.8cm}M{0.8cm}M{0.8cm}N}
+		& \multicolumn{4}{l|}{Bi-stable repressilator}         & \multicolumn{4}{l}{Tri-stable toggle switch}        &\\[8pt] \hline
+		State count & \multicolumn{2}{c}{$\sim2.25e4$} & \multicolumn{2}{c|}{$\sim$1000} & \multicolumn{2}{c}{$\sim3.4e5$} & \multicolumn{2}{c}{$\sim3000$} &\\[8pt] \hline
+		Property    & $\varphi_1$ & $\varphi_2$ & $\varphi_3$ & $\varphi_4$ & $\varphi_1$ & $\varphi_2$ & $\varphi_3$ & $\varphi_4$  &\\[8pt] \hline
+		1cpu/4gb    & 112s & 35s & 259s & 89s & 63s & 62s & 125s & 30s &\\[8pt]
+		2cpu/8gb    & 76s & 31s & 168s & 71s & 45s & 42s & 86s & 20s  &\\[8pt]
+		4cpu/16gb   & 65s & 26s & 110s & 44s & 35s & 36s & 57s & 17s &\\[8pt]
+		8cpu/32gb   & 38s & 26s & 65s & 40s & 30s & 28s & 39s & 14s &\\[8pt]
 	\end{tabular}
 \end{table}
