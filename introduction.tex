@@ -4,13 +4,13 @@ Before we dive into the technical details of this work, let us briefly describe 
 
 As countless examples from biology, physics and economy suggest, naturally occurring phenomena are often extremely hard, even impossible, to study \emph{computationally}. This is often due to a huge amount of information involved. In order to study such phenomena, science often resorts to using models, which omit unnecessary details of the physical reality and focus only on the minimal representation needed to encode the interesting dynamics.
 
-One of such modelling techniques are \emph{dynamical systems} [CITE], which employ the framework of \emph{ordinary differential equations} to describe the dynamics of physical phenomena. In order to study such models exactly, one usually relies on techniques from the field of mathematical analysis. However, these are often intractable due to the sheer complexity of the differential equations involved. In such cases, one often needs to resort to simulation or various types of visualisations.
+One of such modelling techniques are \emph{dynamical systems} \cite{dynSys, dynSys2}, which employ the framework of \emph{ordinary differential equations} to describe the dynamics of physical phenomena. In order to study such models exactly, one usually relies on techniques from the field of mathematical analysis. However, these are often intractable due to the sheer complexity of the differential equations involved. In such cases, one often needs to resort to simulation or various types of visualisations.
 
 \subsubsection{\textbf{Parameter synthesis}}
 
 When dealing with models, one often has to consider a significant amount of \emph{uncertainty}, usually represented using parameters which influence the systems dynamics. The uncertainty can arise under different circumstances, due to the nature of the system (e.g. properties which are hard to measure experimentally) or due to the design of the system (e.g. initial conditions which are controlled by the scientist). However, no matter what is the reason for the uncertainty, it always complicates the study of the model. Even simulation and visualisation can be intractable when high amount of uncertainty is involved. 
 
-In such systems, we talk about a \emph{parameter synthesis} problem [CITE]. That is, given a desired property, determine all parameter valuations under which the system satisfies the property. For example, given a model of a cell with an ambient temperature as a parameter, determine under which circumstances is the cell able to reproduce. 
+In such systems, we talk about a \emph{parameter synthesis} problem. That is, given a desired property, determine all parameter valuations under which the system satisfies the property. For example, given a model of a cell with an ambient temperature as a parameter, determine under which circumstances is the cell able to reproduce. 
 
 %Closely related to this problem is also the problem of \emph{bifurcation analysis}. The goal of bifurcation analysis is to partition the parameter space into regions where parameters do not qualitatively change the behaviour of the system.
 
@@ -20,13 +20,13 @@ Before solving the parameter synthesis problem, one needs to first provide a for
 
 %Temporal logic is a special case of \emph{modal logic} where the modality is used to represent the flow of time.
 
-Commonly used temporal logics include \acf{LTL} and \acf{CTL}, where \ac{LTL} uses the notion of linear time, whereas \ac{CTL} uses branching time. In general, \ac{LTL} is therefore more suitable for reasoning about deterministic systems, while \ac{CTL} is applicable to non-deterministic ones. Various extensions and modifications of these temporal logics exists. In this work, we introduce and employ a hybrid extension of the UCTL logic [CITATION], the \acf{HUCTLp}, as our framework for specifying model properties.
+Commonly used temporal logics include \acf{LTL} and \acf{CTL}, where \ac{LTL} uses the notion of linear time, whereas \ac{CTL} uses branching time. In general, \ac{LTL} is therefore more suitable for reasoning about deterministic systems, while \ac{CTL} is applicable to non-deterministic ones. Various extensions and modifications of these temporal logics exists \cite{ext2, huctl, ext1}. In this work, we introduce and employ a hybrid extension of the UCTL logic \cite{uctl}, the \acf{HUCTLp} \cite{fm2016}, as our framework for specifying model properties.
 
 \subsubsection{\textbf{Model checking}}
 
-To solve the parameter synthesis problem for properties specified using \ac{HUCTLp} logic, we introduce an algorithm based on the well known \emph{model checking} technique [CITE]. Model checking is an exhaustive method which can be used to verify whether the given system satisfies some specification. It is a well studied framework often used for software and hardware verification.
+To solve the parameter synthesis problem for properties specified using \ac{HUCTLp} logic, we introduce an algorithm based on the well known \emph{model checking} technique \cite{clarke}. Model checking is well studied  exhaustive method often used for software and hardware verification, but which can be also applied to the parameter synthesis problem \cite{batt, gilbert, donze, jha}.
 
-To cope with the parameter uncertainty, we use the coloured approach [CITE], which enables us to consider multiple parameter valuations with equivalent local behaviour at the same time, thus reducing the average computation time.
+To cope with the parameter uncertainty, we use the coloured approach \cite{ieee, ATVA}, which enables us to consider multiple parameter valuations with equivalent local behaviour at the same time, thus reducing the average computation time.
 
 \subsubsection{\textbf{Overview}}
  

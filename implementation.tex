@@ -1,4 +1,4 @@
-The algorithm presented in this work is available as an open source implementation [CITE]. This implementation forms a key part in the Pithya parameter synthesis tool for ODE based biochemical models.
+The algorithm presented in this work is available as an open source implementation. This implementation forms a key part in the Pithya \cite{pithya} parameter synthesis tool for ODE based biochemical models. The source code and manual are also provided as digital appendices.
 
 In this chapter, we discuss the architecture and characteristics of this implementation.
 
@@ -6,12 +6,12 @@ In this chapter, we discuss the architecture and characteristics of this impleme
 
 The Pithya tool has two main components: \emph{graphical user interface} and the \emph{core engine}. Here, we are concerned only about the core engine.
 
-The core engine is implemented in an object-oriented manner using the Kotlin programming language (compiles to standard JVM byte-code). Furthermore, the engine can use the Z3 SMT solver for decisions about the parameter formulae.
+The core engine is implemented in an object-oriented manner using the Kotlin programming language (compiles to standard JVM byte-code). Furthermore, the engine can use the Microsoft Z3 SMT solver \cite{z3} for decisions about the parameter formulae.
 
 The core engine itself is also divided into several modules:
 
 \begin{itemize}
-	\item \textbf{Temporal Logic Module} This module is responsible for parsing the \ac{HUCTLp} formulae and performing necessary transformations to ensure the formulae use only the supported set of operators. The input format of the \ac{HUCTLp} formulae is specified as an ATLR4 grammar.
+	\item \textbf{Temporal Logic Module} This module is responsible for parsing the \ac{HUCTLp} formulae and performing necessary transformations to ensure the formulae use only the supported set of operators. The input format of the \ac{HUCTLp} formulae is specified as an ATLR4 \cite{antlr} grammar.
 	\item \textbf{Parameter Synthesis Module} The main module containing the algorithm itself with abstract definitions of the necessary data structures such as solver, state map or model.
 	\item \textbf{ODE Model Module} Defines a parser for the \texttt{.bio} ODE model files and a set of solvers, successor generators and state maps that work with ODE models.
 	\item \textbf{CLI Front-end} Provides a command line interface, combining the functionality of all modules into one executable.
@@ -99,7 +99,7 @@ As a result of this operation, user obtains a set of \texttt{StateMap}s which re
 	\label{fig:ode_workflow}
 \end{figure}
 
-The ODE model module provides implementations for working with various types of models based on ordinary differential equations. The models are originally represented using a .bio model format (grammar provided in ANTLR4 syntax in Appendix [TODO]) and this module is responsible for parsing the model file, computing the piecewise linear approximation and transforming the model into \ac{PDTS} fragments that can be then used by the main parameter synthesis module. The module also provides appropriate solvers for the supported model types.	
+The ODE model module provides implementations for working with various types of models based on ordinary differential equations. It relies on the abstraction procedure described in \cite{abs, absOverview} when transforming the continuous equations into a discrete state space. The models are originally represented using a .bio model format (grammar provided in ANTLR4 syntax in the digital appendix) and this module is responsible for parsing the model file, computing the piecewise linear approximation and transforming the model into \ac{PDTS} fragments that can be then used by the main parameter synthesis module. The module also provides appropriate solvers for the supported model types.	
 
 The work flow of this process, with all of it's main components is depicted in figure \ref{fig:ode_workflow}. After the piecewise linear approximation is constructed, the model is analysed for relationships between parameters and an appropriate parameter representation is chosen.
 
@@ -116,19 +116,19 @@ Finally, this module also provides an \texttt{Abstract Model} class which implem
 \begin{figure}[]
 	\centering
 	\includegraphics[scale=0.9]{media/cli_workflow.pdf}
-	\caption{Work flow of the command line frontend. }
+	\caption{Work flow of the command line front-end. }
 	\label{fig:cli_workflow}
 \end{figure}
 
-The command line frontend connects all these modules into one package with a well defined input and output. Schematic description of this module is given in Figure \ref{fig:cli_workflow}.
+The command line front-end connects all these modules into one package with a well defined input and output. Schematic description of this module is given in Figure \ref{fig:cli_workflow}.
 
 The process starts by parsing given input files and creating $N$ independent partitions connected using a shared memory communication channel. These data structures are then passed into the parameter synthesis engine.
 
-As soon as the parameter synthesis is finished, the frontend module obtains $N$ partial results from the synthesis engine. These partial results are then merged into one general result set. Finally, the result set can be exported using two supported output formats. First format provides export into a machine readable .json file, suitable for further post-processing or visualisations. Second format provides a more human readable text format, which can be useful when debugging or working with simple models.
+As soon as the parameter synthesis is finished, the front-end module obtains $N$ partial results from the synthesis engine. These partial results are then merged into one general result set. Finally, the result set can be exported using two supported output formats. First format provides export into a machine readable .json file, suitable for further post-processing or visualisations. Second format provides a more human readable text format, which can be useful when debugging or working with simple models.
 
-The actual content of both formats depends on the type of parameter representation used by the model. When working with hyper-rectangular parameter representation, a parameter constrain is represented using a suitable multi dimensional array interpreted directly as a set of hyper-rectangles. On the other hand, when working with the pure SMT approach, a parameter constrain is represented as a SMT-LIB 2 formula [TODO CITE].
+The actual content of both formats depends on the type of parameter representation used by the model. When working with hyper-rectangular parameter representation, a parameter constrain is represented using a suitable multi dimensional array interpreted directly as a set of hyper-rectangles. On the other hand, when working with the pure SMT approach, a parameter constrain is represented as a SMT-LIB 2 formula \cite{smtlib}.
 
 Finally, a set of diagnostic and benchmarking data is collected during the computation. These include the amount and frequency of data transfers between partitions (to monitor possible communication bottlenecks) and the average solver throughput (corresponds to the complexity of parameter constrains which were encountered during the computation). These data are generally printed directly to the standard output or can be easily redirected into a separate file.
 
-For a detailed description of the command line arguments accepted by the frontend module, see the tool manual [CITE].
+For a detailed description of the command line arguments accepted by the front-end module, see the tool manual provided as a digital appendix.
 

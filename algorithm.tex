@@ -141,7 +141,7 @@ Notice that except for the \emph{at} operator, the semantic function uses only t
 
 \subsection{Semantic function fixed point}
 
-As we can see, the semantic function computed according to the rules presented in this section is clearly monotonic (thanks to the $\Leftarrow$ operator) with respect to the complete lattice formed by the assumption functions of $\mathcal{K}$. Therefore according to the Knaster-Tarski theorem [CITE], $\mathcal{C}$ has a least fixed point which can be computed by repeated application of $\mathcal{C}$.
+As we can see, the semantic function computed according to the rules presented in this section is clearly monotonic (thanks to the $\Leftarrow$ operator) with respect to the complete lattice formed by the assumption functions of $\mathcal{K}$. Therefore according to the Knaster-Tarski theorem \cite{tarski1955}, $\mathcal{C}$ has a least fixed point which can be computed by repeated application of $\mathcal{C}$.
 
 \subsection{Semantic function validity}
 
@@ -235,9 +235,9 @@ The Algorithm \ref{alg:main} starts with a fully unknown assignment and iterativ
 	\label{alg:main}
 \end{algorithm}
 
-Here, the $\textsc{TerminationDetection}$ procedure will return true only if the assumptions have not changed since last termination attempt and no communication is taking place. We don't discuss a specific implementation for this procedure, since termination detection in distributed systems is a well studied problem [CITE] and an optimal implementation usually depends on the available communication primitives in our environment.
+Here, the $\textsc{TerminationDetection}$ procedure will return true only if the assumptions have not changed since last termination attempt and no communication is taking place. We don't discuss a specific implementation for this procedure, since termination detection in distributed systems is a well studied problem \cite{termination} and an optimal implementation usually depends on the available communication primitives in our environment.
 
-To simplify the description of the $\textsc{Communication}$ procedure, we assume that each agent can directly update assumptions of other agents. This is of course an unrealistic expectation in a distributed system. In reality, this form of communication assumes a proper message is sent, received and handled by the receiving agent. However, we do not provide an explicit pseudocode for this, since it is, similar to the $\textsc{TerminationDetection}$, a problem which largely depends on the available environment (in a multi-core machine simulating the distributed environment, even a direct update can be possible) and has been efficiently solved before [CITE].
+To simplify the description of the $\textsc{Communication}$ procedure, we assume that each agent can directly update assumptions of other agents. This is of course an unrealistic expectation in a distributed system. In reality, this form of communication assumes a proper message is sent, received and handled by the receiving agent. However, we do not provide an explicit pseudocode for this, since it is, similar to the $\textsc{TerminationDetection}$, a problem which largely depends on the available environment (in a multi-core machine simulating the distributed environment, even a direct update can be possible) and has been efficiently solved before \cite{comm}.
 
 Note that, as we also discussed in the previous section, the \emph{at} operator requires special treatment, due to its ability to access arbitrary states.
 
