@@ -70,7 +70,7 @@ To demonstrate the applicability of our approach, we provide an analysis of the 
 
 We study two types of stability motifs. First is a terminal strongly connected component, which can be represented using the \ac{HUCTLp} formula $tSCC = \hctlBind{x} \future\ctlA\ctlG \future\ctlE\ctlF x$. Intuitively, a terminal strongly connected component is a maximal set of states that are pairwise reachable (meaning that from any state, I can reach the whole component, but nothing else).
 
-Second motif is a terminal cycle, represented using the formula $tCycle = \hctlBind{x} \future\ctlA\ctlX \future\ctlA\ctlF$. Intuitively, a terminal cycle is a stronger requirement than a terminal component, since the component can contain multiple interleaving cycles, while the terminal cycle property explicitly specifies that there is exactly one cycle (otherwise the $\ctlA$ requirement would be broken).
+Second motif is a single terminal cycle, represented using the formula $tCycle = \hctlBind{x} \future\ctlA\ctlX \future\ctlA\ctlF$. Intuitively, a terminal cycle is a stronger requirement than a terminal component, since the component can contain multiple interleaving cycles, while the terminal cycle property explicitly specifies that there is exactly one cycle (otherwise the $\ctlA$ requirement would be broken).
 
 Notice that we would expect each model to have at least one terminal strongly connected component, however, no such requirement can be imposed to terminal cycles.
 

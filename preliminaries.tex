@@ -106,7 +106,7 @@ To reason about a \ac{DTS}, we define the following \ac{HUCTLp} logic.
 	
 \end{definition}
 
-We call all $\varphi$ formulae \emph{state formulae} and all $\psi$ formulae $\psi$ \emph{path formulae}. We write $cl(\varphi)$ to denote the set of all sub-formulae of $\varphi$.
+We call all $\varphi$ formulae \emph{state formulae} and all $\psi$ formulae \emph{path formulae}. We write $cl(\varphi)$ to denote the set of all sub-formulae of $\varphi$ and $sub(\varphi)$ to denote the set of all direct sub-formulae.
 
 The temporal operators follow the common naming scheme based on \ac{CTL} ($\ctlX$ - next, $\ctlU$ - until, $\ctlW$ - weak until), but we also introduce new operators, namely $\hctlAt{x} \varphi$, pronounced "at", $\hctlBind{x} \varphi$, pronounced "bind" and $\hctlExists{x} \varphi$, pronounced "exists".
 
@@ -114,7 +114,7 @@ Note that in situations where the aspect of time flow is irrelevant (i.e. when t
 
 \subsection{Semantics}
 
-In order to describe semantics of the \ac{HUCTLp} as a whole, we will define the semantics of the state and path formulae separately. The model of a state formula over \ac{DTS} $M$ is a state $s$ while the model of a path formula is a run $\pi$. Furthermore, each model is extended with a partial function $h : \var \to \dtsS$, which represents the valuation of the state variables.
+In order to describe semantics of the \ac{HUCTLp} as a whole, we define the semantics of the state and path formulae separately. The model of a state formula over \ac{DTS} $M$ is a state $s$ while the model of a path formula is a run $\pi$. Furthermore, each model is extended with a partial function $h : \var \to \dtsS$, which represents the valuation of the state variables.
 
 We write $h_0$ to denote an empty valuation and $h[x \mapsto s]$ to denote a valuation which maps variable $x$ to a state $s$ but is otherwise defined as valuation $h$, formally:
 
@@ -185,7 +185,7 @@ First, we define directed extensions of the standard \ac{CTL} $\ctlF$ and $\ctlG
 
 Further discussion of these operators and their relationship with their \ac{CTL} counterparts is provided in Subsection \ref{sec:weak}.
 
-Second, we define other operators commonly used in first order logic:
+Second, we define other operators commonly used in the first order logic:
 
 \begin{align*}
 	\hctlForall{x} \varphi 		   		& \equiv \neg \hctlExists{x} \neg \varphi \\
@@ -212,7 +212,7 @@ Since \ac{HUCTLp} is an extension of \ac{CTL}, its operators can be used to defi
  \ctlA[\varphi_1 \ctlW \varphi_2] 	 & \equiv \future\ctlA[\varphi_1 \dctlWl{true} \varphi_2] \\
  \end{align*}
  
-As one can easily observe, by using $true$ as a direction formula, the direction restrictions imposed by \ac{HUCTLp} can be easily ignored and the pure \ac{CTL} operators are obtained. For a further discussion on the effects of direction restrictions on the \ac{CTL} semantics, please see section \ref{sec:weak}.
+As one can easily observe, by using $true$ as a direction formula, the direction restrictions imposed by \ac{HUCTLp} can be ignored and the pure \ac{CTL} operators are obtained. For a further discussion on the effects of direction restrictions on the \ac{CTL} semantics, please see section \ref{sec:weak}.
 
 \subsection{Weak operators}
 \label{sec:weak}
@@ -300,7 +300,7 @@ We	 write $\tP{s}{t}$ to denote the set of all parameter valuations for which th
 \subsection{Parameter representation}
 \label{sec:paramRepresentation}
 
-In this work, we assume that the parameters of the \ac{PDTS} $\mathcal{K}$ are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $p \models \Phi \iff p \in \tP{s}{t}$. We call such formula a parameter constrain. We will use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we will use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} properties.
+In this work, we assume that the parameters of the \ac{PDTS} $\mathcal{K}$ are represented symbolically. We thus assume that we are given a (first-order) theory that is interpreted over the parameter valuations. Every $\tP{s}{t}$ is then represented using a formula $\Phi$ such that $p \models \Phi \iff p \in \tP{s}{t}$. We call such formula a parameter constrain. We use the notation $\ffalse$ and $\ttrue$ to denote the contradiction and tautology in terms of parameter formulae and the standard logical operators $\neg, \lor, \land$ to combine the parameter formulae. In general, we use upper-case Greek letters $\Phi, \Psi, ...$ to denote the parameter formulae and lower-case Greek letters $\varphi, \psi, ...$ to denote the \ac{HUCTLp} properties.
 
 We assume the following expressions can be used to reason about the parameter formulae describing a specific \ac{PDTS}:
 
@@ -309,7 +309,7 @@ We assume the following expressions can be used to reason about the parameter fo
 	\item $\withTime{t}dir(s, \chi ,t) = \Phi$ such that $p \models \Phi \iff \exists d \in \dtsDir : (s, d, p, t) \in \withTime{t}\pdtsT \land d \models \chi$; which represents all parameters for which the transition is enabled and the given direction constraint is satisfied.
 \end{itemize}
 
-When reasoning about parameter formulae, we will usually use semantic equality (i.e. $\Phi_1 \equiv \Phi_2 \iff \forall p \in \pdtsP : p \models \Phi_1 \iff p \models \Phi_2$). In cases where syntactic equality is used instead of semantic equality, this fact should be explicitly stated. Notice that this allows us to reason about parameter formulae similarly to standard sets, however this needs to be taken into account when reasoning about complexity of various operations.
+When reasoning about the parameter formulae, we usually use semantic equality (i.e. $\Phi_1 \equiv \Phi_2 \iff \forall p \in \pdtsP : p \models \Phi_1 \iff p \models \Phi_2$). In cases where syntactic equality is used instead of semantic equality, this fact should be explicitly stated. Notice that this allows us to reason about parameter formulae similarly to standard sets, however this needs to be taken into account when reasoning about complexity of various operations.
 
 \section{Parameter Synthesis}
 
@@ -327,7 +327,7 @@ All states that are not local, but can directly reach or be reached from a local
 
 We write $\dtsSrelevant_i = \dtsSlocal_i \cup \dtsSborder_i$ to denote the set of the \emph{relevant} states. That is, the states which directly influence the value of local states.
 
-Finally, all states which are not local nor border states are called remote. The set of all remote states is denoted $\dtsSremote_i$. Furthermore, for each fragment $i$ holds that $\dtsS = \dtsSlocal_i \cup \dtsSborder_i \cup \dtsSremote_i$ and that $\emptyset = \dtsSlocal_i \cap \dtsSborder_i \cap \dtsSremote_i$.
+Finally, all states which are not local nor border states are called remote. The set of all remote states is denoted $\dtsSremote_i$. Furthermore, for each fragment $i$ holds that $\dtsS = \dtsSlocal_i \cup \dtsSborder_i \cup \dtsSremote_i$ and $\emptyset = \dtsSlocal_i \cap \dtsSborder_i \cap \dtsSremote_i$.
 
 \subsection{Partitioning}
 
@@ -340,4 +340,4 @@ In this section, we also define two key properties of a partition function that 
 
 As we can see, in order to achieve good performance, the partition function needs to satisfy both of these properties. However, this can't be easily achieved for all systems. Without any prior knowledge of the system, one could design a partition function that would be close to uniformity, but that might also introduce a significant amount of cross transitions. Similarly, if one were to focus on optimizing the amount of cross transitions, the resulting partitioning might not be uniform enough to be able to distribute to agents with limited resources.
 
-In the Implementation Chapter \ref{chap:implementation}, we describe how to exploit specific properties of models based on dynamical systems to design partitioning that is both uniform and ensures on average a small amount of cross transitions.
+%In the Implementation Chapter \ref{chap:implementation}, we describe how to exploit specific properties of models based on dynamical systems to design partitioning that is both uniform and ensures on average a small amount of cross transitions.

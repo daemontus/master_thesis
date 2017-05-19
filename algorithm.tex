@@ -21,7 +21,7 @@ From now on, we will only consider valid assumption functions unless stated othe
 \begin{itemize}
 	\item Assumption implies satisfaction, but satisfaction does not necessarily imply assumption.
 	\item Parameter constrain $\assumeT(\psi, s, h) \land \assumeF(\psi, s, h)$ can never be satisfiable - i.e. $\psi$ cannot be assumed to be valid and invalid at the same time.
-	\item Parameter constrain $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. We will denote this parameter constrains as $\assumeU(\psi, s, h)$.
+	\item Parameter constrain $\neg\assumeT(\psi, s, h) \land \neg\assumeF(\psi, s, h)$ can be satisfiable. This situation signifies that for some parameter valuations the result is yet \emph{unknown}. We will denote this parameter constrain as $\assumeU(\psi, s, h)$.
 	\item These intuitive equalities hold only when the set of unknown parameter valuations is empty:
 	
 	\begin{align*}
@@ -56,7 +56,7 @@ In this definition, we do not use the full operator set of \ac{HUCTLp}, but rath
 
 Also observe that this operation is monotonic with respect to the assumption function ordering, that is, the set of unknown parameter valuations can only decrease by applying $\Leftarrow$.
 
-The definition if the semantic function itself is divided into several parts, based on the \ac{HUCTLp} operators it deals with. Each part declaratively defines the new assumption function $\assume_{out}$ based on the given $\assume_{in}$.
+The definition of the semantic function itself is divided into several parts, based on the \ac{HUCTLp} operators it deals with. Each part declaratively defines the new assumption function $\assume_{out}$ based on the given $\assume_{in}$.
 
 \begin{figure}
 	\begin{align*}
@@ -217,7 +217,7 @@ The Algorithm \ref{alg:main} starts with a fully unknown assignment and iterativ
 			\EndFor
 			%\State for $s \in \dtsSlocal : Unknown(h, s) \gets \neg \assumeT(\varphi, h, s) \land \neg \assumeF(\varphi, h, s)$		
 			\State for $s \in \dtsSlocal : \assumeF(\varphi, h, s) \Leftarrow \assumeU(\varphi, h, s) \land Done(h,s)$
-			\State \Return $Unknown$
+			\State \Return $\assumeU(\varphi)$
 		\EndFunction
 		\Function{Communicate}{assumption function $\assume$}
 			\ForAll{$s \in \dtsSlocal_{id}$}
@@ -287,7 +287,7 @@ Because assumptions for all sub-formulae are known, the only operators for which
 
 %Here we should also note that except for the $\hctlAt{x} \varphi$ operator, all operators depend only on other local and border states.  
 
-However, the assumption of the computation and communication fixed point also implies that the only possible case when assumption for such operator can be unknown is in case of a circular dependency between assumptions. Any other case would imply that either the communication has not been handled properly (and therefore we have unknown parameter valuations that should have been resolved using communication) or the fixed point has not been reached yet (and therefore some parameter valuations can still increase due to assumptions about their successors).
+However, the assumption of the computation and communication fixed point also implies that the only possible case when assumption for such operator can be unknown is in case of a circular dependency between assumptions. Any other case would imply that either the communication has not been handled properly (and therefore we have unknown parameter valuations that should have been resolved using communication) or the fixed point has not been reached yet (and therefore some parameter valuations can still increase due to the assumptions about their successors).
 
 Finally, if a parametrisation is unknown due to a circular dependency between assumptions, it can be safely assumed to be negative. That is because such assumption cannot ever increase to a positive value, therefore also the property cannot hold in such state. \qed
 
@@ -313,7 +313,7 @@ One notable part of the algorithm that has been intentionally left out of the ma
 \begin{itemize}
 	\item In the definition of the semantic function, assumptions about the temporal operators usually depend on all local and border states. This requirement can be easily reduced to just the actual successors (for some parameter valuation). In transition systems where a state has only a small number of potential successors, this means that the number of assumption dependencies is often not linear in the size of state space, but rather constant or at least logarithmic.
 	\item Complexity can be further reduced by memorizing intermediate results of operations. When assumption in state $s$ depends on its $k$ successors, one can build a tree-like structure that can be then updated in logarithmic time when one of the dependencies changes.
-	\item Since determining whether a value of an assumption changed or not requires a semantic equality check, which is often a very expensive operation, it can be beneficial to delay such check as long as possible (without introducing additional checks later). An example of such delaying would be to ensure, that the check is performed only when no dependencies of the assumption under question are still being updated (or waiting to be updated). In other words, one can process the dependencies in a "distance-to-proposition" order, ensuring the values are updated only when necessary.
-	\item It is crucial for the effectiveness of the algorithm to maintain compact representations of the parameter formulae produced during computation. To this end, instead of using a simple formula solver, one should look for solvers that can also simplify the investigated formulae. However, such operations are usually even harder than standard formula solving. It might be therefore beneficial to employ heuristics that can delay formula simplification when not needed or that can separate parts of the formula that cannot be further simplified.
+	\item Since determining whether a value of an assumption changed or not requires a semantic equality check, which is often a very expensive operation, it can be beneficial to delay such check as long as possible (without introducing additional checks later). An example of such delaying would be to ensure that the check is performed only when no dependencies of the assumption under question are still being updated (or waiting to be updated). In other words, one can process the dependencies in a "distance-to-proposition" order, ensuring the values are updated only when necessary.
+	\item It is crucial for the effectiveness of the algorithm to maintain a compact representations of the parameter formulae produced during computation. To this end, instead of using a simple formula solver, one should look for solvers that can also simplify the investigated formulae. However, such operations are usually even harder than standard formula solving. It might be therefore beneficial to employ heuristics that can delay formula simplification when not needed or that can separate parts of the formula that cannot be further simplified.
 \end{itemize}
 
