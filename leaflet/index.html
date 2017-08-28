@@ -76,7 +76,7 @@
 		height: 85px;
 	}
 	.column {
-		height: 760px;
+		height: 660px;
 		width: 683px;
 		margin: 16px;
 		margin-bottom: 8px;
@@ -111,6 +111,31 @@
 	.push {
 		margin-top: 16px;
 	}
+	.method-image {
+		width: 159px;
+		margin-top: 8px;
+	}
+	.method-image-cell {
+		width: 167px;
+		padding-right: 8px;
+	}
+	.number {
+		font-size: 24px;
+		line-height: 38px;
+		margin: 0 8px 0 8px;
+		float: left;
+		color: #990000;
+	}
+	.prop {
+		float: right;
+		font-size: 20px;
+	}
+	.result {
+		width: 269px;
+		margin-top: 12px;
+		margin-bottom: 8.5px;
+		margin-left: 38px;
+	}
 </style>
 </head>
 
@@ -127,7 +152,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td>
+		<td style="height: 660px;">
 			<div class="column left">
 				<span class="box-title">Motivation and Problem Statement</span>
 				<div class="box titled">					
@@ -140,30 +165,66 @@
 				</div>
 				<span class="box-title push">Parameter Synthesis by Model Checking</span>
 				<div class="box titled">					
-					<p>We focus on models developed in <b>systems biology</b> based on <i>ordinary differential equations (ODE)</i> and properties given in the <i>hybrid computation tree logic (HUCTL)</i> developed at our laboratory.</p>
-					<p>We base our algorithm on <i>model checking</i>, which is a common verification technique. However, to deal with the parameter uncertainty, we work with a <b>symbolic parameter space representation</b>, which exploits the similarities between close parameter valuations while still allowing effective parallelisation.</p>
-					<table>
+					<ul>
+						<li>We focus on models developed in <b>systems biology</b> based on <i>ordinary differential equations (ODE)</i> and properties given in the <i>hybrid computation tree logic (HUCTL)</i> developed at our laboratory.</li>
+						<li>Our algorithm [1] is based on <i>model checking</i>, which is a common verification technique. However, to deal with the parameter uncertainty, we work with a <b>symbolic parameter space representation</b>, which exploits the similarities between close parameter valuations while still allowing effective parallelisation.</li>
+						<li>The decisions about the symbolic parameter sets are translated to <b>SMT queries</b> and delegated to an appropriate solver.
+					</ul>
+					<table style="margin-top: 10px;">
 						<tr>
-							<td>1. The vector field of the original ODE <img src="img/vector.png" style="width: 175px; float: right; display: inline;"/></td>
-							<td>2. A multi-affine approximation <img src="img/vector_linear.png" width="150"/></td>
+							<td class="method-image-cell">
+								<span class="number">1.</span> The vector field of the ODEs
+							</td>
+							<td class="method-image-cell">
+								<span class="number">2.</span> A multi-affine approximation
+							</td>
+							<td class="method-image-cell">
+								<span class="number">3.</span> A semi-symbolic transition system
+							</td>
+							<td class="method-image-cell" style="width: 159px; padding: 0;">
+								<span class="number">4.</span> Property validity regions
+							</td>
 						</tr>
 						<tr>
-							<td>3. A discrete transition system <img src="img/trans.png" width="150"/></td>
-							<td>4. Property validity region<img src="img/bistable_states.png" width="150"/></td>
+							<td class="method-image-cell">
+								<img class="method-image" src="img/vector.png"/>	
+							</td>
+							<td class="method-image-cell">
+								<img class="method-image" src="img/vector_linear.png"/>								
+							</td>
+							<td class="method-image-cell">
+								<img class="method-image" src="img/trans.png"/>								
+							</td>
+							<td class="method-image-cell" style="width: 159px; padding: 0;">
+								<img class="method-image" src="img/bistable_states.png"/>								
+							</td>
 						</tr>
 					</table>															
 				</div>
 			</div>
 		</td>
-		<td>
+		<td style="height: 660px;">
 			<div class="column right">
 				<span class="box-title">HUCTL: Temporal Logic for Bifurcation Analysis</span>
 				<div class="box titled">					
-					Lorem Ipsum
+					<p>Temporal logics are a common framework for expressing properties of transition systems. However, these logics usually rely on quantitative information to express behavioural properties (<i>Is there an attractor where x > 3?</i>). in [2] we extended the <i>computation tree logic (CTL)</i> with hybrid operators in order to reason about general behavioural patterns (<i>Is there an attractor anywhere in the system?</i>).
+
+					<br/>
+					<span style="font-size: 16px; line-height: 22px;">
+					Stable steady state pattern: <span class="prop">↓ x: <b>AX</b> x</span><br/>
+					Unstable steady state pattern: <span class="prop">↓ x: <b>EX</b> x</span><br/>
+					General attractor pattern: <span class="prop">↓ x: <b>AG EF</b> x</span><br/>
+					Two instances of <i>pattern</i>: <span class="prop">∃ x ∈ <i>pattern</i> : <i>pattern</i> ∧ ¬ <b>EF</b> <i>pattern</i></span>
+					</span>
 				</div>
 				<span class="box-title push">PITHYA: Parameter Investigation Tool</span>
 				<div class="box titled">					
-					Lorem Ipsum
+					<p>We implement our method in an open-source tool Pithya [3]. This tool (at various stages of development) was used for analysis of several real biological models, specifically a model of <b>biodegradation of 1,2,3-trichloropropane</b> using a synthetic pathway in [4], various <b>cell singalling pathway</b> models in [5] or a <b>G1/S transition cycle</b> model in [6].</p>
+
+					<img class="result" src="img/param.png"/>
+					<img class="result" src="img/state.png"/>
+
+					<p><small>Try Pithya online at:</small> <b><span style="font-family: monospace;">http://pithya.ics.muni.cz</span></b></p>
 				</div>
 			</div>
 		</td>
@@ -172,10 +233,8 @@
 		<td colspan="2">
 			<div class="footer">
 				<div class="box">
-					<b>References:</b>
-
-					<b>Publications:</b>
-
+					<p><b>Publications:</b><small> [1] Benes, Brim, Demko, Pastva, Safranek: <i>Parallel SMT-Based Parameter Synthesis with Application to Piecewise Multi-affine Systems</i>, ATVA 2016. [2] Benes, Brim, Demko, Pastva, Safranek: A Model Checking Approach to Discrete Bifurcation Analysis, FM 2016. [3] Benes, Brim, Demko, Pastva, Safranek: <i>Pithya: A Parallel Tool for Parameter Synthesis of Piecewise Multi-Affine Dynamical Systems</i>, CAV 2017. [4] Demko, Benes, Brim, Pastva, Safranek: <i>High-Performance Symbolic Parameter Synthesis of Biological Models: A Case Study</i>, CMSB 2016. [5] Hajnal, Safranek, Demko, Pastva, Krejci, Brim: <i>Toward Modelling and Analysis of Transient and Sustained Behaviour of Signalling Pathways</i> HSB 2016. [6] Brim, Ceska, Demko, Pastva, Safranek: <i>Parameter Synthesis by Parallel Coloured CTL Model Checking</i>, CMSB 2015.</small></p>
+					<br/>
 					<p><small>
 						With special thanks to the rest of our laboratory research group: <i>David Šafránek, Martin Demko, Nikola Beneš and Matej Hajnal
 					</i></small></p>					
