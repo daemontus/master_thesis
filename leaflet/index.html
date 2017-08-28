@@ -14,10 +14,16 @@
 		margin: 0px;
 		padding: 0px;
 	}
-	tr, td, table {
+	tr, td, table, p, ul {
 		padding: 0px;
 		margin: 0px;
 		border-spacing: 0px;
+	}
+	ul {
+		padding-left: 22px;
+	}
+	li {
+		padding-bottom: 4px;
 	}
 	.page {
 		width: 1414px;
@@ -65,14 +71,13 @@
 		left: 0px;
 	}
 	.footer {
-		background: black;
 		margin: 16px;
 		margin-top: 8px;
-		height: 77px;
+		height: 85px;
 	}
 	.column {
-		background: black;
 		height: 760px;
+		width: 683px;
 		margin: 16px;
 		margin-bottom: 8px;
 	}
@@ -81,6 +86,30 @@
 	}
 	.column.right {
 		margin-left: 8px;
+	}
+	.box {
+		background: #ECEFF1;
+		padding: 8px;
+		border: 2px solid #90A4AE;
+		border-radius: 0 0 2px 2px;
+	}
+	.box.titled {
+		border-top: none;
+	}
+	.box-title {
+		display: block;		
+		background: #546E7A;
+		color: #fefefe;
+		padding: 8px;
+		font-weight: 500;
+		letter-spacing: 0.8px;
+		font-size: 18px;
+		border: 2px solid #546E7A;
+		border-bottom-color: #990000;
+		border-radius: 4px 4px 0 0;
+	}
+	.push {
+		margin-top: 16px;
 	}
 </style>
 </head>
@@ -99,16 +128,48 @@
 	</tr>
 	<tr>
 		<td>
-			<div class="column left">a</div>
+			<div class="column left">
+				<span class="box-title">Motivation and Problem Statement</span>
+				<div class="box titled">					
+					<ul>
+						<li>Many researchers in biology, physics, economy and other scientific fields rely on <b>formal models</b> when studying <i>complex systems</i> ocurring in the real world.</li>
+						<li>Such models often contain <b>parameters</b> which influence the model behaviour. Exact values of the parameters are usually hard to measure or completely unknown.</li>
+						<li>To determine the exact influence of parameters on the model behaviour is crucial to our understanding of these models and to the evaluation of their soundness.</li>
+						<li><b>Parameter Synthesis Problem:</b> For a given <i>model</i> and a given <i>property</i>, compute <i>parameter valuations</i> under which the model satisfies the property.</li>
+					</ul>					
+				</div>
+				<span class="box-title push">Parameter Synthesis by Model Checking</span>
+				<div class="box titled">					
+					<p>We focus on models developed in <b>systems biology</b> based on <i>ordinary differential equations (ODE)</i> and properties given in the <i>hybrid computation tree logic (HUCTL)</i> developed at our laboratory.</p>
+					<p>We base our algorithm on <i>model checking</i>, which is a common verification technique. However, to deal with the parameter uncertainty, we work with a <b>symbolic parameter space representation</b>, which exploits the similarities between close parameter valuations while still allowing effective parallelisation.</p>
+				</div>
+			</div>
 		</td>
 		<td>
-			<div class="column right">a</div>
+			<div class="column right">
+				<span class="box-title">HUCTL: Temporal Logic for Bifurcation Analysis</span>
+				<div class="box titled">					
+					Lorem Ipsum
+				</div>
+				<span class="box-title push">PITHYA: Parameter Investigation Tool</span>
+				<div class="box titled">					
+					Lorem Ipsum
+				</div>
+			</div>
 		</td>
 	</tr>
 	<tr>
 		<td colspan="2">
 			<div class="footer">
-				b
+				<div class="box">
+					<b>References:</b>
+
+					<b>Publications:</b>
+
+					<p><small>
+						With special thanks to the rest of our laboratory research group: <i>David Šafránek, Martin Demko, Nikola Beneš and Matej Hajnal
+					</i></small></p>					
+				</div>
 			</div>
 		</td>
 	</tr>
