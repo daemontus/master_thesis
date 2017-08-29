@@ -131,10 +131,9 @@
 		font-size: 20px;
 	}
 	.result {
-		width: 269px;
-		margin-top: 12px;
-		margin-bottom: 8.5px;
-		margin-left: 38px;
+		width: 230px;		
+		margin-top: -4px;
+		margin-left: 68px;
 	}
 </style>
 </head>
@@ -207,7 +206,7 @@
 			<div class="column right">
 				<span class="box-title">HUCTL: Temporal Logic for Bifurcation Analysis</span>
 				<div class="box titled">					
-					<p>Temporal logics are a common framework for expressing properties of transition systems. However, these logics usually rely on quantitative information to express behavioural properties (<i>Is there an attractor where x > 3?</i>). in [2] we extended the <i>computation tree logic (CTL)</i> with hybrid operators in order to reason about general behavioural patterns (<i>Is there an attractor anywhere in the system?</i>).
+					<p>Temporal logics are a common framework for expressing properties of transition systems. However, these logics usually rely on quantitative information to express behavioural properties (<i>Is there an attractor where x > 3?</i>). In [2] we extended the <i>computation tree logic (CTL)</i> with hybrid operators in order to reason about <b>general behavioural patterns</b> (<i>Is there an attractor anywhere in the system?</i>). Such properties are often investigated in <i>bifurcation analysis</i> of the original ODEs, which is a hard analytical problem. Here, we provide a way to achieve comparable results <b>algorithmically</b> on the discretised models.
 
 					<br/>
 					<span style="font-size: 16px; line-height: 22px;">
@@ -218,11 +217,15 @@
 					</span>
 				</div>
 				<span class="box-title push">PITHYA: Parameter Investigation Tool</span>
-				<div class="box titled">					
+				<div class="box titled" style="position: relative;">					
 					<p>We implement our method in an open-source tool Pithya [3]. This tool (at various stages of development) was used for analysis of several real biological models, specifically a model of <b>biodegradation of 1,2,3-trichloropropane</b> using a synthetic pathway in [4], various <b>cell singalling pathway</b> models in [5] or a <b>G1/S transition cycle</b> model in [6].</p>
 
-					<img class="result" src="img/param.png"/>
+					<p style="margin-top: 6px; text-align: center;"><small>Two attractors discovered in a bi-stable repressilator model:</small></p>
+
+					<span style="transform: rotate(-90deg); position: absolute; left: -20px; top: 215px;"><small>Location of the attractors</small></span>
 					<img class="result" src="img/state.png"/>
+					<span style="transform: rotate(-90deg); position: absolute; left: 278px; top: 210px; width: 150px; text-align: center;"><small>Corresponding parameter valuations</small></span>
+					<img class="result" src="img/param.png"/>					
 
 					<p><small>Try Pithya online at:</small> <b><span style="font-family: monospace;">http://pithya.ics.muni.cz</span></b></p>
 				</div>
@@ -236,7 +239,7 @@
 					<p><b>Publications:</b><small> [1] Benes, Brim, Demko, Pastva, Safranek: <i>Parallel SMT-Based Parameter Synthesis with Application to Piecewise Multi-affine Systems</i>, ATVA 2016. [2] Benes, Brim, Demko, Pastva, Safranek: A Model Checking Approach to Discrete Bifurcation Analysis, FM 2016. [3] Benes, Brim, Demko, Pastva, Safranek: <i>Pithya: A Parallel Tool for Parameter Synthesis of Piecewise Multi-Affine Dynamical Systems</i>, CAV 2017. [4] Demko, Benes, Brim, Pastva, Safranek: <i>High-Performance Symbolic Parameter Synthesis of Biological Models: A Case Study</i>, CMSB 2016. [5] Hajnal, Safranek, Demko, Pastva, Krejci, Brim: <i>Toward Modelling and Analysis of Transient and Sustained Behaviour of Signalling Pathways</i> HSB 2016. [6] Brim, Ceska, Demko, Pastva, Safranek: <i>Parameter Synthesis by Parallel Coloured CTL Model Checking</i>, CMSB 2015.</small></p>
 					<br/>
 					<p><small>
-						With special thanks to the rest of our laboratory research group: <i>David Šafránek, Martin Demko, Nikola Beneš and Matej Hajnal
+						With special thanks to the rest of our laboratory research group: <i>Nikola Beneš, Martin Demko, Matej Hajnal and David Šafránek
 					</i></small></p>					
 				</div>
 			</div>
