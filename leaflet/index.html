@@ -129,6 +129,8 @@
 	.prop {
 		float: right;
 		font-size: 20px;
+		display: inline-block;
+		margin-right: 8px;
 	}
 	.result {
 		width: 230px;		
@@ -145,7 +147,7 @@
 			<span class="title">Parallel parameter synthesis from hybrid logic HUCTL formulas</span>
 			<img class="logo-muni" src="img/muni.svg"/>
 			<img class="logo-sybila" src="img/sybila.svg">
-			<span class="name" style="display: inline-block; margin-right: 32px;"><small>Student:</small> Samuel Pastva</span>
+			<span class="name" style="display: inline-block; margin-right: 32px;">Samuel Pastva</span>
 			<span class="advisor"><small>Advisor:</small> prof. RNDr. Luboš Brim, CSc.</span>
 			<span class="header-divider"></span>
 		</td>
@@ -156,9 +158,9 @@
 				<span class="box-title">Motivation and Problem Statement</span>
 				<div class="box titled">					
 					<ul>
-						<li>Many researchers in biology, physics, economy and other scientific fields rely on <b>formal models</b> when studying <i>complex systems</i> ocurring in the real world.</li>
+						<li>When studying <i>complex systems</i> ocurring in the real world, many researchers in biology, physics, economy, and other scientific fields rely on <b>formal models</b>.</li>
 						<li>Such models often contain <b>parameters</b> which influence the model behaviour. Exact values of the parameters are usually hard to measure or completely unknown.</li>
-						<li>To determine the exact influence of parameters on the model behaviour is crucial to our understanding of these models and to the evaluation of their soundness.</li>
+						<li>To determine the exact influence of parameter values on the model behaviour is crucial to our understanding of these models and to the evaluation of their soundness.</li>
 						<li><b>Parameter Synthesis Problem:</b> For a given <i>model</i> and a given <i>property</i>, compute <i>parameter valuations</i> under which the model satisfies the property.</li>
 					</ul>					
 				</div>
@@ -206,7 +208,7 @@
 			<div class="column right">
 				<span class="box-title">HUCTL: Temporal Logic for Bifurcation Analysis</span>
 				<div class="box titled">					
-					<p>Temporal logics are a common framework for expressing properties of transition systems. However, these logics usually rely on quantitative information to express behavioural properties (<i>Is there an attractor where x > 3?</i>). In [2] we extended the <i>computation tree logic (CTL)</i> with hybrid operators in order to reason about <b>general behavioural patterns</b> (<i>Is there an attractor anywhere in the system?</i>). Such properties are often investigated in <i>bifurcation analysis</i> of the original ODEs, which is a hard analytical problem. Here, we provide a way to achieve comparable results <b>algorithmically</b> on the discretised models.
+					<p>Temporal logics are a common framework for expressing properties of transition systems. However, these logics usually rely on quantitative information to express behavioural properties (<i>Is there an attractor where x > 3?</i>). In [2] we extended the <i>computation tree logic</i> with hybrid operators in order to reason about <b>general behavioural patterns</b> (<i>Is there an attractor anywhere in the system?</i>). Such properties are often investigated in <i>bifurcation analysis</i> of the original ODEs, which is a hard analytical problem. Here, we provide a way to achieve comparable results <b>algorithmically</b> on the discretised models.
 
 					<br/>
 					<span style="font-size: 16px; line-height: 22px;">
@@ -218,7 +220,7 @@
 				</div>
 				<span class="box-title push">PITHYA: Parameter Investigation Tool</span>
 				<div class="box titled" style="position: relative;">					
-					<p>We implement our method in an open-source tool Pithya [3]. This tool (at various stages of development) was used for analysis of several real biological models, specifically a model of <b>biodegradation of 1,2,3-trichloropropane</b> using a synthetic pathway in [4], various <b>cell singalling pathway</b> models in [5] or a <b>G1/S transition cycle</b> model in [6].</p>
+					<p>We implement our method in an open-source tool Pithya [3]. This tool (at various stages of development) was used for analysis of several real biological models, specifically a model of <b>biodegradation of 1,2,3-trichloropropane</b> using a synthetic pathway in [4], various <b>cell singalling pathway</b> models in [5], and a <b>G1/S transition cycle</b> model in [6].</p>
 
 					<p style="margin-top: 6px; text-align: center;"><small>Two attractors discovered in a bi-stable repressilator model:</small></p>
 
@@ -236,10 +238,11 @@
 		<td colspan="2">
 			<div class="footer">
 				<div class="box">
-					<p><b>Publications:</b><small> [1] Benes, Brim, Demko, Pastva, Safranek: <i>Parallel SMT-Based Parameter Synthesis with Application to Piecewise Multi-affine Systems</i>, ATVA 2016. [2] Benes, Brim, Demko, Pastva, Safranek: A Model Checking Approach to Discrete Bifurcation Analysis, FM 2016. [3] Benes, Brim, Demko, Pastva, Safranek: <i>Pithya: A Parallel Tool for Parameter Synthesis of Piecewise Multi-Affine Dynamical Systems</i>, CAV 2017. [4] Demko, Benes, Brim, Pastva, Safranek: <i>High-Performance Symbolic Parameter Synthesis of Biological Models: A Case Study</i>, CMSB 2016. [5] Hajnal, Safranek, Demko, Pastva, Krejci, Brim: <i>Toward Modelling and Analysis of Transient and Sustained Behaviour of Signalling Pathways</i> HSB 2016. [6] Brim, Ceska, Demko, Pastva, Safranek: <i>Parameter Synthesis by Parallel Coloured CTL Model Checking</i>, CMSB 2015.</small></p>
+				<!-- diakritika -->
+					<p><b>Publications:</b><small> [1] Beneš, Brim, Demko, Pastva, Šafránek: <i>Parallel SMT-Based Parameter Synthesis with Application to Piecewise Multi-affine Systems</i>, ATVA 2016. [2] Beneš, Brim, Demko, Pastva, Šafránek: A Model Checking Approach to Discrete Bifurcation Analysis, FM 2016. [3] Beneš, Brim, Demko, Pastva, Šafránek: <i>Pithya: A Parallel Tool for Parameter Synthesis of Piecewise Multi-Affine Dynamical Systems</i>, CAV 2017. [4] Demko, Beneš, Brim, Pastva, Šafránek: <i>High-Performance Symbolic Parameter Synthesis of Biological Models: A Case Study</i>, CMSB 2016. [5] Hajnal, Šafránek, Demko, Pastva, Krejci, Brim: <i>Toward Modelling and Analysis of Transient and Sustained Behaviour of Signalling Pathways</i>, HSB 2016. [6] Brim, Češka, Demko, Pastva, Šafránek: <i>Parameter Synthesis by Parallel Coloured CTL Model Checking</i>, CMSB 2015.</small></p>
 					<br/>
 					<p><small>
-						With special thanks to the rest of our laboratory research group: <i>Nikola Beneš, Martin Demko, Matej Hajnal and David Šafránek
+						With special thanks to the rest of our laboratory research group: <i>Nikola Beneš, Martin Demko, Matej Hajnal, and David Šafránek.
 					</i></small></p>					
 				</div>
 			</div>
